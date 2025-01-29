@@ -28,7 +28,7 @@ end
 
 function Enemy.spawn()
     table.insert(Enemy.enemies, {
-        x = love.math.random(-50,-450),
+        x = love.math.random(-50,-250),
         y = 310,
         speed = love.math.random(50, 200),
         stopX = love.math.random(200, 600),
