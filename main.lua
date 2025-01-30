@@ -58,7 +58,7 @@ function love.keypressed(key)
         end
     elseif currentState == "play" then
         -- Manejar las teclas en el gameplay (si es necesario)
-        Player.keypressed(key)
+       -- Player.keypressed(key)
     end
 end
 
