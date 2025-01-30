@@ -7,6 +7,7 @@ local Menu = require("menu") -- Importar el menú
 
 -- Estados del juego
 local currentState = "menu" -- Estado inicial: menú
+local gamePaused = false    -- Estado de pausa
 
 function love.load()
     love.window.setTitle("Shooter prueba")
@@ -24,10 +25,12 @@ function love.update(dt)
         -- Actualizar el menú
         Menu.update(dt)
     elseif currentState == "play" then
-        -- Actualizar el gameplay
-        Player.update(dt)
-        Enemy.update(dt)
-        Game.update(dt)
+        if not gamePaused then
+            -- Actualizar el gameplay solo si no está pausado
+            Player.update(dt)
+            Enemy.update(dt)
+            Game.update(dt)
+        end
     end
 end
 
@@ -40,6 +43,15 @@ function love.draw()
         Game.draw()
         Enemy.draw()
         Player.draw()
+
+        -- Dibujar la pantalla de pausa si el juego está pausado
+        if gamePaused then
+            love.graphics.setColor(0, 0, 0, 0.5) -- Fondo semitransparente
+            love.graphics.rectangle("fill", 0, 0, love.graphics.getWidth(), love.graphics.getHeight())
+            love.graphics.setColor(1, 1, 1) -- Color del texto
+            love.graphics.printf("PAUSA", 0, love.graphics.getHeight() / 2 - 20, love.graphics.getWidth(), "center")
+            love.graphics.printf("Presiona P para reanudar", 0, love.graphics.getHeight() / 2 + 20, love.graphics.getWidth(), "center")
+        end
     end
 end
 
@@ -58,7 +70,9 @@ function love.keypressed(key)
         end
     elseif currentState == "play" then
         -- Manejar las teclas en el gameplay (si es necesario)
-       -- Player.keypressed(key)
+        if key == "p" or key == "P" then
+            gamePaused = not gamePaused -- Alternar entre pausado y no pausado
+        end
     end
 end
 

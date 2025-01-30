@@ -62,7 +62,7 @@ function Enemy.spawn()
         x = love.math.random(-50, -250),
         y = 310,
         speed = love.math.random(50, 200),
-        stopX = love.math.random(200, 600),
+        stopX = love.math.random(1, 300),
         stopped = false,
         dead = false,
         state = Enemy.STATE_MOVING,  -- Estado inicial
