@@ -55,33 +55,46 @@ function love.draw()
     end
 end
 
+local pausedMouseX, pausedMouseY = 0, 0 -- Variables para guardar la posición del mouse durante la pausa
+
 function love.keypressed(key)
-    if currentState == "menu" then
-        -- Manejar las teclas en el menú
-        local nextState = Menu.keypressed(key)
-        if nextState == "play" then
-            currentState = "play" -- Cambiar al estado de juego
-            Enemy.spawn() -- Generar un enemigo inicial
-        elseif nextState == "options" then
-            -- Aquí puedes agregar lógica para el menú de opciones
-            print("Opciones seleccionadas (no implementado)")
-        elseif nextState == "quit" then
-            love.event.quit() -- Salir del juego
+    if currentState == "play" and not gamePaused then -- Solo permitir cambiar de arma si no está pausado
+        if key == "1" then
+            Player.switchWeapon("pistol")
+        elseif key == "2" then
+            Player.switchWeapon("shotgun")
+        elseif key == "3" then
+            Player.switchWeapon("punch")
         end
-    elseif currentState == "play" then
-        -- Manejar las teclas en el gameplay (si es necesario)
-        if key == "p" or key == "P" then
-            gamePaused = not gamePaused -- Alternar entre pausado y no pausado
+    end
+
+    if currentState == "menu" then
+            -- Manejar las teclas en el menú
+            local nextState = Menu.keypressed(key)
+            if nextState == "play" then
+                currentState = "play"
+                Enemy.spawn()
+            elseif nextState == "options" then
+                print("Opciones seleccionadas (no implementado)")
+            elseif nextState == "quit" then
+                love.event.quit()
+            end
+        elseif currentState == "play" then
+            -- Manejar la tecla de pausa
+            if key == "p" or key == "P" then
+                gamePaused = not gamePaused
         end
     end
 end
 
 function love.mousepressed(x, y, button)
     if currentState == "play" and button == 1 then -- Click izquierdo en el gameplay
-        -- Activar la animación de disparo siempre
-        Player.shoot()
-
-        -- Verificar si se hizo clic sobre un enemigo
-        Enemy.checkClick(x, y)
+        if not gamePaused then -- Solo disparar si el juego no está pausado
+            Player.shoot()
+            Enemy.checkClick(x, y) -- Verificar si se hizo clic sobre un enemigo
+        end
     end
 end
+
+
+local pausedMouseX, pausedMouseY = 0, 0 -- Variables para guardar la posición del mouse durante la pausa

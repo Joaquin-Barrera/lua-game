@@ -75,37 +75,39 @@ function Enemy.spawn()
 end
 
 function Enemy.update(dt)
-    for i = #Enemy.enemies, 1, -1 do
-        local enemy = Enemy.enemies[i]
+    if not gamePaused then
+        for i = #Enemy.enemies, 1, -1 do
+            local enemy = Enemy.enemies[i]
 
-        if enemy.dead then
-            -- Si está muerto, actualizar la animación de muerte
-            if enemy.deathAnimation then
-                enemy.deathAnimation:update(dt)
-                if enemy.deathAnimation.finished then
-                    table.remove(Enemy.enemies, i) -- Eliminar enemigo tras animación
-                end
-            end
-        else
-            if enemy.state == Enemy.STATE_MOVING then
-                -- Movimiento normal si aún no ha muerto
-                if not enemy.stopped then
-                    enemy.x = enemy.x + enemy.speed * dt
-                    if enemy.x >= enemy.stopX then
-                        enemy.stopped = true
-                        enemy.state = Enemy.STATE_SHOOTING  -- Cambiar a estado de disparo
-                        enemy.animation = enemy.shootingAnimation  -- Cambiar a animación de disparo
+            if enemy.dead then
+                -- Si está muerto, actualizar la animación de muerte
+                if enemy.deathAnimation then
+                    enemy.deathAnimation:update(dt)
+                    if enemy.deathAnimation.finished then
+                        table.remove(Enemy.enemies, i) -- Eliminar enemigo tras animación
                     end
                 end
-                enemy.animation:update(dt)
-            elseif enemy.state == Enemy.STATE_SHOOTING then
-                -- Lógica de disparo
-                enemy.shootTimer = enemy.shootTimer + dt
-                if enemy.shootTimer >= enemy.shootCooldown then
-                    enemy.shootTimer = 0
-                    Enemy.shoot(enemy)  -- Disparar
+            else
+                if enemy.state == Enemy.STATE_MOVING then
+                    -- Movimiento normal si aún no ha muerto
+                    if not enemy.stopped then
+                        enemy.x = enemy.x + enemy.speed * dt
+                        if enemy.x >= enemy.stopX then
+                            enemy.stopped = true
+                            enemy.state = Enemy.STATE_SHOOTING  -- Cambiar a estado de disparo
+                            enemy.animation = enemy.shootingAnimation  -- Cambiar a animación de disparo
+                        end
+                    end
+                    enemy.animation:update(dt)
+                elseif enemy.state == Enemy.STATE_SHOOTING then
+                    -- Lógica de disparo
+                    enemy.shootTimer = enemy.shootTimer + dt
+                    if enemy.shootTimer >= enemy.shootCooldown then
+                        enemy.shootTimer = 0
+                        Enemy.shoot(enemy)  -- Disparar
+                    end
+                    enemy.animation:update(dt)
                 end
-                enemy.animation:update(dt)
             end
         end
     end

@@ -1,54 +1,50 @@
 local Player = {}
+local Weapons = require("weapons") -- Importar el módulo de armas
 
 function Player.load()
     cursorSprite = love.graphics.newImage("sprites/mira.png")
-    cursorSprite:setFilter("nearest", "nearest") -- Evita que la imagen se vea borrosa al escalar
+    cursorSprite:setFilter("nearest", "nearest")
 
-    Player.armaNormal = love.graphics.newImage("sprites/pistol1.png")
-    Player.armaDisparando = love.graphics.newImage("sprites/pistol4.png")
-    Player.currentArma = Player.armaNormal
-    Player.anchura_arma = Player.armaNormal:getWidth()
-    Player.altura_arma = Player.armaNormal:getHeight()
+    Weapons.load() -- Cargar las armas
+    Player.currentWeapon = Weapons.list.pistol -- Arma inicial
     Player.arma_X = 0
     Player.arma_Y = 0
-    Player.isShooting = false
-    Player.shootDuration = 0.1
-    Player.shootTimer = 0
 end
 
-
 function Player.update(dt)
-    Player.arma_X, Player.arma_Y = love.mouse.getPosition()
-    Player.arma_X = Player.arma_X - Player.anchura_arma / 1.8
-    Player.arma_Y = Player.arma_Y - Player.altura_arma / 2
-
-    if Player.isShooting then
-        Player.shootTimer = Player.shootTimer - dt 
-        if Player.shootTimer <= 0 then
-            Player.isShooting = false
-            Player.currentArma = Player.armaNormal
-            playShotSound()
-        end
+    if not gamePaused then -- Solo actualizar si el juego no está pausado
+        Player.arma_X, Player.arma_Y = love.mouse.getPosition()
+        Player.arma_X = Player.arma_X - Player.currentWeapon.width / 1.8
+        Player.arma_Y = Player.arma_Y - Player.currentWeapon.height / 2
+        Weapons.update(dt, Player.currentWeapon)
     end
 end
 
 function Player.draw()
-    love.graphics.draw(Player.currentArma, Player.arma_X, Player.arma_Y)
-    
-    local mouseX, mouseY = love.mouse.getPosition()
-    local scaleFactor = 0.5 -- Ajusta el tamaño de la mira según necesites
-    local cursorWidth = cursorSprite:getWidth() * scaleFactor
-    local cursorHeight = cursorSprite:getHeight() * scaleFactor
+    -- Dibujar el arma solo si el juego no está pausado
+    if not gamePaused then
+        Weapons.draw(Player.currentWeapon, Player.arma_X, Player.arma_Y)
+    end
 
-    -- Dibujar la mira escalada correctamente
-    love.graphics.draw(cursorSprite, mouseX, mouseY, 0, scaleFactor, scaleFactor, cursorWidth / (scaleFactor * 2), cursorHeight / (scaleFactor * 2))
+    -- Dibujar el cursor solo si el juego no está pausado
+    if not gamePaused then
+        local mouseX, mouseY = love.mouse.getPosition()
+        local scaleFactor = 0.5
+        local cursorWidth = cursorSprite:getWidth() * scaleFactor
+        local cursorHeight = cursorSprite:getHeight() * scaleFactor
+
+        love.graphics.draw(cursorSprite, mouseX, mouseY, 0, scaleFactor, scaleFactor, cursorWidth / (scaleFactor * 2), cursorHeight / (scaleFactor * 2))
+    end
 end
 
 
 function Player.shoot()
-    Player.currentArma = Player.armaDisparando
-    Player.isShooting = true
-    Player.shootTimer = Player.shootDuration
+    Weapons.shoot(Player.currentWeapon) -- Disparar el arma actual
+end
+
+function Player.switchWeapon(weaponName)
+    Player.currentWeapon = Weapons.list[weaponName] -- Cambiar de arma
+    
 end
 
 return Player
