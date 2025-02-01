@@ -40,12 +40,12 @@ function Player.drawHealthBar()
 
     -- Dibujar la vida faltante (fondo rojo)
     love.graphics.setColor(1, 0, 0)  -- Rojo
-    love.graphics.rectangle("fill", x, y, width, height)
+    love.graphics.rectangle("fill", tankX, tankY, width, height)
 
     -- Dibujar la vida actual (verde)
     local healthWidth = (Player.health / Player.maxHealth) * width
     love.graphics.setColor(0, 1, 0)  -- Verde
-    love.graphics.rectangle("fill", x, y, healthWidth, height)
+    love.graphics.rectangle("fill", tankX, tankY, healthWidth, height)
 
     -- Restaurar el color predeterminado
     love.graphics.setColor(1, 1, 1)
