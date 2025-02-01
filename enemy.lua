@@ -66,12 +66,33 @@ function Enemy.spawn()
         stopped = false,
         dead = false,
         state = Enemy.STATE_MOVING,  -- Estado inicial
-        animation = anim8.newAnimation(Enemy.grid('2-5', 4), 0.1), -- Animación normal (usando enemigo.png)
+        animation = anim8.newAnimation(Enemy.grid('2-5', 4), 0.15), -- Animación normal (usando enemigo.png)
         shootingAnimation = Enemy.shootingAnimationTemplate:clone(), -- Animación de disparo (usando shooting.png)
         deathAnimation = nil,  -- Animación de muerte específica
         shootCooldown = 2,     -- Tiempo entre disparos
-        shootTimer = 0         -- Temporizador para disparar
+        shootTimer = 0,        -- Temporizador para disparar
+        health = 3,            -- Vida del enemigo (aguanta 2 disparos, muere al tercero)
+        maxHealth = 3          -- Vida máxima del enemigo
     })
+end
+
+function Enemy.drawHealthBar(enemy)
+    local x = enemy.x  -- Posición X de la barra de vida (encima del enemigo)
+    local y = enemy.y + 100  -- Posición Y de la barra de vida
+    local width = Enemy.anchura_enemigo  -- Ancho de la barra de vida
+    local height = 5  -- Alto de la barra de vida
+
+    -- Dibujar la vida faltante (fondo rojo)
+    love.graphics.setColor(1, 0, 0)  -- Rojo
+    love.graphics.rectangle("fill", x, y, width, height)
+
+    -- Dibujar la vida actual (verde)
+    local healthWidth = (enemy.health / enemy.maxHealth) * width
+    love.graphics.setColor(0, 1, 0)  -- Verde
+    love.graphics.rectangle("fill", x, y, healthWidth, height)
+
+    -- Restaurar el color predeterminado
+    love.graphics.setColor(1, 1, 1)
 end
 
 function Enemy.update(dt)
@@ -130,21 +151,36 @@ function Enemy.draw()
         else
             -- Dibujar la animación normal o de disparo según el estado
             if enemy.state == Enemy.STATE_SHOOTING then
-                enemy.animation:draw(Enemy.shootingSpritesheet, enemy.x, (enemy.y+ 55)) -- Usar shooting.png
+                enemy.animation:draw(Enemy.shootingSpritesheet, enemy.x, (enemy.y + 55)) -- Usar shooting.png
             else
                 enemy.animation:draw(Enemy.spritesheet, enemy.x, enemy.y) -- Usar enemigo.png
             end
+
+            -- Dibujar la barra de vida del enemigo
+            Enemy.drawHealthBar(enemy)
         end
     end
 end
 
-function Enemy.checkClick(x, y)
+function Enemy.checkClick(x, y, weapon)
+    -- Verificar si el arma está recargando
+    if weapon.isReloading then
+        print("El arma está recargando, no puedes eliminar enemigos.")
+        return false
+    end
+
     for i = #Enemy.enemies, 1, -1 do
         local enemy = Enemy.enemies[i]
         if not enemy.dead and x >= enemy.x and x <= enemy.x + Enemy.anchura_enemigo and y >= enemy.y and y <= enemy.y + Enemy.altura_enemigo then
-            -- Cambiar a animación de muerte
-            enemy.dead = true
-            enemy.deathAnimation = Enemy.deathAnimationTemplate:clone() -- Clonar animación para que sea independiente
+            -- Reducir la vida del enemigo
+            enemy.health = enemy.health - 1
+
+            -- Verificar si el enemigo murió
+            if enemy.health <= 0 then
+                enemy.dead = true
+                enemy.deathAnimation = Enemy.deathAnimationTemplate:clone() -- Clonar animación para que sea independiente
+            end
+
             return true
         end
     end

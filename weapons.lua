@@ -9,7 +9,12 @@ function Weapons.load()
             height = 0,
             shootDuration = 0.1,
             isShooting = false,
-            shootTimer = 0
+            shootTimer = 0,
+            ammo = 10,
+            magazineSize = 10,
+            reloadTime = 1.5, -- Tiempo de recarga en segundos
+            isReloading = false,
+            reloadTimer = 0
         },
         shotgun = {
             normal = love.graphics.newImage("sprites/shotgun1.png"),
@@ -18,19 +23,15 @@ function Weapons.load()
             height = 0,
             shootDuration = 0.1,
             isShooting = false,
-            shootTimer = 0
-        },
-        punch = {
-            normal = love.graphics.newImage("sprites/punch1.png"),
-            shooting = love.graphics.newImage("sprites/punch3.png"),
-            width = 0,
-            height = 0,
-            shootDuration = 0.1,
-            isShooting = false,
-            shootTimer = 0
-        },
-        -- Añade más armas aquí
-    }
+            shootTimer = 0,
+            ammo = 6,
+            magazineSize = 6,
+            reloadTime = 2.0,
+            isReloading = false,
+            reloadTimer = 0
+        }
+    }-- para añadir más armas, copiar la lógica de las armas anteriores y pegarla aqui, cambiando el nombre y los sprites
+     --IMPORTANTE: Tambien modificar main.lua para incluir el cambio de arma
 
     -- Inicializar dimensiones de las armas
     for _, weapon in pairs(Weapons.list) do
@@ -40,11 +41,16 @@ function Weapons.load()
 end
 
 function Weapons.update(dt, weapon)
-    if weapon.isShooting then
+    if weapon.isReloading then
+        weapon.reloadTimer = weapon.reloadTimer - dt
+        if weapon.reloadTimer <= 0 then
+            weapon.isReloading = false
+            weapon.ammo = weapon.magazineSize -- Recargar el cargador
+        end
+    elseif weapon.isShooting then
         weapon.shootTimer = weapon.shootTimer - dt
         if weapon.shootTimer <= 0 then
             weapon.isShooting = false
-            -- Aquí podrías añadir lógica adicional, como reproducir un sonido
         end
     end
 end
@@ -54,10 +60,31 @@ function Weapons.draw(weapon, x, y)
     love.graphics.draw(currentSprite, x, y)
 end
 
-function Weapons.shoot(weapon) --lo que pasa cuando el arma dispara
-    playShotSound()
-    weapon.isShooting = true
-    weapon.shootTimer = weapon.shootDuration
+function Weapons.shoot(weapon)
+    if weapon.isReloading then
+        return -- No puede disparar si está recargando
+    end
+    
+    if weapon.ammo > 0 then
+        playShotSound()
+        weapon.isShooting = true
+        weapon.shootTimer = weapon.shootDuration
+        weapon.ammo = weapon.ammo - 1
+        
+        if weapon.ammo == 0 then
+            Weapons.reload(weapon)
+        end
+    else
+        Weapons.reload(weapon)
+    end
+end
+
+function Weapons.reload(weapon)
+    if not weapon.isReloading then
+        weapon.isReloading = true
+        weapon.reloadTimer = weapon.reloadTime
+        -- Aquí podrías reproducir un sonido de recarga
+    end
 end
 
 return Weapons

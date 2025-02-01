@@ -14,7 +14,7 @@ end
 
 function Game.draw()
     love.graphics.draw(Game.background, 0, 0)
-    love.graphics.print("Ronda: " .. Game.round, 10, 10)
+    love.graphics.print("Ronda: " .. Game.round, 10, 30)
 end
 
 return Game
