@@ -2,6 +2,7 @@ local Player = {}
 local Weapons = require("weapons") -- Importar el módulo de armas
 
 function Player.reload()
+    playReloadSound()
     Weapons.reload(Player.currentWeapon) -- Recargar el arma actual
 end
 

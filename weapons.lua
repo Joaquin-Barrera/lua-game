@@ -10,9 +10,9 @@ function Weapons.load()
             shootDuration = 0.1,
             isShooting = false,
             shootTimer = 0,
-            ammo = 10,
-            magazineSize = 10,
-            reloadTime = 1.5, -- Tiempo de recarga en segundos
+            ammo = 12, --municion inicial                               --DEBEN CAMBIARSE 
+            magazineSize = 12, --tamaño del cargador                    --AL MISMO TIEMPO
+            reloadTime = 1.2, -- Tiempo de recarga en segundos
             isReloading = false,
             reloadTimer = 0
         },
@@ -67,6 +67,7 @@ function Weapons.shoot(weapon)
     
     if weapon.ammo > 0 then
         playShotSound()
+        playshellSound()
         weapon.isShooting = true
         weapon.shootTimer = weapon.shootDuration
         weapon.ammo = weapon.ammo - 1

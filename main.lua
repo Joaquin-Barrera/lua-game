@@ -8,7 +8,7 @@ local currentState = "menu" -- Estado inicial: menú
 local gamePaused = false    -- Estado de pausa
 
 function love.load()
-    love.window.setTitle("Trigger Roulette")    
+    love.window.setTitle("Trigger Rush // Trigger Frenzy")    
     love.window.setMode(800, 600)
     love.mouse.setVisible(false)
 
@@ -87,18 +87,11 @@ function love.mousepressed(x, y, button)
             -- Obtener el arma actual del jugador
             local weapon = Player.getCurrentWeapon()
 
-            -- Verificar si el arma está recargando
-            if weapon.isReloading then
-                print("El arma está recargando, no puedes eliminar enemigos.")
-                return
-            end
-
             -- Intentar disparar
             Player.shoot()
-
+            
             -- Intentar eliminar enemigos
             if Enemy.checkClick(x, y, weapon) then
-                print("Enemigo eliminado!")
             end
         end
     end

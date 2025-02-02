@@ -1,0 +1,51 @@
+🟢 = Implementado en su totalidad o lo suficientemente bien pulido
+🟡 = Implementado pero necesita cambios importantes
+🔴 = Aún no fue Implementado
+
+
+Cosas que están implementadas:
+
+Fondo (cambiar mas adelante) 🟡
+Menu (mejorar) 🟡
+Mira (cambiar) 🟡
+Pistola (cambiar sprite y añadir más armas) 🟡
+Sonido al disparar🟢
+Sonido  de casquillo de bala despues de disparar 🟢 (cuando el casquillo toca el piso)
+Sonido de recarga del jugador 🟢
+Animación al disparar 🟡
+Animación del enemigo al caminar (cambiar) 🟡
+Animación del enemigo cuando se queda quieto disparando 🟡
+Sprite del enemigo cuando muere 🟡
+Contador de rondas 🟢
+Spawn de enemigos 🟢
+Cantidad aleatoria de enemigos que spawnean en cada ronda 🟢
+Velocidad aleatoria a la que se mueven los enemigos 🟢
+Nombre provisorio: Trigger roulette 🟡 
+Cantidad de balas en la recamara y cooldown a la hora de recargar 🟢
+Menu de pausa 🟡
+Objeto a defender (puede ser un helicóptero, una ciudad, una casa, pensar) 🟡
+Barra de vida tanto para el jugador (objeto a defender) como para los enemigos 🟢
+
+Cosas a implementar:
+Menu de compra entre rondas 🔴
+Todo tipo de cosas que se puedan comprar para modificar el gameplay como cartas, potenciadores, etc. 🔴
+Nuevas armas (pensar cuales pueden ser, tomar nota, sacar inspiracion de enter the dungeon y otros roguelikes)🔴
+Nuevos enemigos (buscar inspiración en otros roguelikes y en weapondearmorgames)🔴
+Animaciones mas suaves para todo 🔴
+Pantalla de game over 🔴
+Pantalla de ronda ganada 🔴
+Animación de apuntado del enemigo 🔴
+Animación de recarga del enemigo 🔴
+Añadir la logica de daño de los enemigos 🔴
+Configurar que cada arma tenga un daño diferente 🔴
+Implementar el uso de 2 armas como máximo que se puedan cambiar en cada ronda 🔴
+Hacer las rondas durar más (spawnear + enemigos por ronda) y que spawneen en un rango más grande (en un intervalo de tiempo más grande)🔴
+Animación de cambio de armas 🔴
+Hacer que el daño no sea fijo sino que salgan numeritos como en el CoD para mantener a los nenes adictos 🔴
+
+
+Cosas a arreglar o cambiar:
+
+Mejorar las hitboxes una vez que estén bien definidos los sprites de los enemigos 🟡
+
+
