@@ -18,6 +18,14 @@ function love.load()
     Menu.load() -- Cargar el menú
 end
 
+function resetGame()
+    Player.load()  -- Reinicia la vida y posición del jugador
+    Enemy.clear() -- Elimina todos los enemigos
+    Enemy.load()   -- Carga los enemigos de nuevo
+    Game.round = 0 --por algun motivo tengo que ponerlo en 0 porque si lo pongo en 1 empieza desde la ronda 2, cosa de mandinga
+    currentState = "play" -- Regresar al gameplay desde el inicio
+end
+
 function love.update(dt)
     if currentState == "menu" then
         Menu.update(dt)
@@ -26,6 +34,11 @@ function love.update(dt)
             Player.update(dt, gamePaused)
             Enemy.update(dt)
             Game.update(dt)
+
+            -- Verificar si el jugador ha perdido
+            if Player.health <= 0 then
+                currentState = "gameover"
+            end
         end
     end
 end
@@ -38,6 +51,7 @@ function love.draw()
         Enemy.draw()
         Player.draw(gamePaused)
 
+        -- Mostrar pantalla de pausa
         if gamePaused then
             love.mouse.setVisible(true)
             love.graphics.setColor(0, 0, 0, 0.5)
@@ -48,6 +62,15 @@ function love.draw()
         else
             love.mouse.setVisible(false)
         end
+
+    elseif currentState == "gameover" then
+        -- Pantalla de Game Over
+        love.graphics.setColor(0, 0, 0)
+        love.graphics.rectangle("fill", 0, 0, love.graphics.getWidth(), love.graphics.getHeight()) -- Fondo negro
+        love.graphics.setColor(1, 0, 0)
+        love.graphics.printf("GAME OVER", 0, love.graphics.getHeight() / 2 - 40, love.graphics.getWidth(), "center")
+        love.graphics.setColor(1, 1, 1)
+        love.graphics.printf("Presiona R para reiniciar", 0, love.graphics.getHeight() / 2 + 20, love.graphics.getWidth(), "center")
     end
 end
 
@@ -77,6 +100,10 @@ function love.keypressed(key)
     elseif currentState == "play" then
         if key == "p" or key == "P" then
             gamePaused = not gamePaused
+        end
+    elseif currentState == "gameover" then
+        if key == "r" or key == "R" then
+            resetGame() -- Reiniciar el juego correctamente
         end
     end
 end

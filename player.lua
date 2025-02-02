@@ -1,10 +1,26 @@
 local Player = {}
 local Weapons = require("weapons") -- Importar el módulo de armas
 
+-- Posición real del tanque (ajústala según su ubicación en la pantalla)
+Player.x = 570  -- Cambia este valor según la ubicación del tanque
+Player.y = 350  -- Ajusta la altura según el terreno
+Player.width = 50  -- Ancho del tanque
+Player.height = 50  -- Alto del tanque
+
+
 function Player.reload()
     playReloadSound()
     Weapons.reload(Player.currentWeapon) -- Recargar el arma actual
 end
+
+function Player.getPosition()
+    return Player.x, Player.y
+end
+
+function Player.getSize()
+    return Player.width, Player.height
+end
+
 
 function Player.load()
     cursorSprite = love.graphics.newImage("sprites/mira.png")

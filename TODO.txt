@@ -36,6 +36,8 @@ Pantalla de game over 🔴
 Pantalla de ronda ganada 🔴
 Animación de apuntado del enemigo 🔴
 Animación de recarga del enemigo 🔴
+Animación de disparo del enemigo 🔴
+Sonido de disparo y recarga del enemigo 🔴
 Añadir la logica de daño de los enemigos 🔴
 Configurar que cada arma tenga un daño diferente 🔴
 Implementar el uso de 2 armas como máximo que se puedan cambiar en cada ronda 🔴

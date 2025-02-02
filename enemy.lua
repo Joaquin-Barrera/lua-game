@@ -1,6 +1,10 @@
 anim8 = require "libraries/anim8"
+local Player = require("player")
+
 
 Enemy = {}
+Enemy.projectiles = {} -- Lista de proyectiles enemigos
+
 
 Enemy.anchura_enemigo = 75  -- Ancho de cada frame del enemigo (enemigo.png)
 Enemy.altura_enemigo = 100   -- Alto de cada frame del enemigo (enemigo.png)
@@ -101,46 +105,73 @@ function Enemy.update(dt)
             local enemy = Enemy.enemies[i]
 
             if enemy.dead then
-                -- Si está muerto, actualizar la animación de muerte
                 if enemy.deathAnimation then
                     enemy.deathAnimation:update(dt)
                     if enemy.deathAnimation.finished then
-                        table.remove(Enemy.enemies, i) -- Eliminar enemigo tras animación
+                        table.remove(Enemy.enemies, i)
                     end
                 end
             else
                 if enemy.state == Enemy.STATE_MOVING then
-                    -- Movimiento normal si aún no ha muerto
                     if not enemy.stopped then
                         enemy.x = enemy.x + enemy.speed * dt
                         if enemy.x >= enemy.stopX then
                             enemy.stopped = true
-                            enemy.state = Enemy.STATE_SHOOTING  -- Cambiar a estado de disparo
-                            enemy.animation = enemy.shootingAnimation  -- Cambiar a animación de disparo
+                            enemy.state = Enemy.STATE_SHOOTING
+                            enemy.animation = enemy.shootingAnimation
                         end
                     end
                     enemy.animation:update(dt)
                 elseif enemy.state == Enemy.STATE_SHOOTING then
-                    -- Lógica de disparo
                     enemy.shootTimer = enemy.shootTimer + dt
                     if enemy.shootTimer >= enemy.shootCooldown then
                         enemy.shootTimer = 0
-                        Enemy.shoot(enemy)  -- Disparar
+                        Enemy.shoot(enemy)
                     end
                     enemy.animation:update(dt)
                 end
             end
         end
-    end
+
+        -- **Actualizar proyectiles enemigos**
+        for i = #Enemy.projectiles, 1, -1 do
+            local projectile = Enemy.projectiles[i]
+            projectile.x = projectile.x + projectile.speed * dt  -- Mover hacia la derecha
+        
+            -- Si el proyectil sale de la pantalla, eliminarlo
+            if projectile.x > love.graphics.getWidth() then
+                table.remove(Enemy.projectiles, i)
+            else
+                -- **Detectar colisión con el jugador**
+                if Player.health > 0 and Enemy.checkCollisionWithPlayer(projectile) then
+                    Player.health = Player.health - projectile.damage
+                    table.remove(Enemy.projectiles, i)
+        
+                    -- Si la vida del jugador llega a 0, el juego termina o se reinicia
+
+                end
+            end
+        end
+    end        
 end
+
+
+function Enemy.checkCollisionWithPlayer(projectile)
+    local playerX, playerY = Player.getPosition()
+    local playerWidth, playerHeight = Player.getSize()
+
+    return projectile.x + 5 > playerX and projectile.x < playerX + playerWidth and
+           projectile.y + 10 > playerY and projectile.y < playerY + playerHeight
+end
+
+
 
 function Enemy.draw()
     for _, enemy in ipairs(Enemy.enemies) do
         if enemy.dead and enemy.deathAnimation then
-            -- Escalar y centrar la animación de muerte
             local scale = 1  
-            local offsetX = Enemy.anchura_enemigo * ((1 - scale) + 0.3) -- Controla que tan horizontal se muestra la calavera
-            local offsetY = Enemy.altura_enemigo * (1 - scale - 0.1) -- Controla que tan vertical se muestra la calavera
+            local offsetX = Enemy.anchura_enemigo * ((1 - scale) + 0.3)
+            local offsetY = Enemy.altura_enemigo * (1 - scale - 0.1)
 
             enemy.deathAnimation:draw(
                 Enemy.deathSpritesheet,
@@ -149,18 +180,24 @@ function Enemy.draw()
                 scale, scale
             )
         else
-            -- Dibujar la animación normal o de disparo según el estado
             if enemy.state == Enemy.STATE_SHOOTING then
-                enemy.animation:draw(Enemy.shootingSpritesheet, enemy.x, (enemy.y + 55)) -- Usar shooting.png
+                enemy.animation:draw(Enemy.shootingSpritesheet, enemy.x, (enemy.y + 55))
             else
-                enemy.animation:draw(Enemy.spritesheet, enemy.x, enemy.y) -- Usar enemigo.png
+                enemy.animation:draw(Enemy.spritesheet, enemy.x, enemy.y)
             end
 
-            -- Dibujar la barra de vida del enemigo
             Enemy.drawHealthBar(enemy)
         end
     end
+
+    -- **Dibujar los proyectiles enemigos**
+    love.graphics.setColor(1, 0, 0)  -- Rojo para los proyectiles enemigos
+    for _, projectile in ipairs(Enemy.projectiles) do
+        love.graphics.rectangle("fill", projectile.x, projectile.y, 5, 10)
+    end
+    love.graphics.setColor(1, 1, 1)  -- Restaurar color predeterminado
 end
+
 
 function Enemy.checkClick(x, y, weapon)
     -- Verificar si el arma está recargando
@@ -188,16 +225,25 @@ function Enemy.checkClick(x, y, weapon)
 end
 
 function Enemy.shoot(enemy)
-    -- Crear un proyectil en la posición del enemigo
     local projectile = {
-        x = enemy.x + Enemy.anchura_enemigo / 2,  -- Centrar el proyectil en el enemigo
+        x = enemy.x + Enemy.anchura_enemigo / 2,  -- Inicia desde el centro del enemigo
         y = enemy.y + Enemy.altura_enemigo / 2,
-        speed = 100,  -- Velocidad del proyectil
-        active = true
+        speed = 700,  -- Velocidad del proyectil enemigo
+        damage = 10,  -- Daño que inflige el disparo
+        active = true, -- Activo hasta que salga de la pantalla o impacte
+        directionX = 1,  -- Dirección en el eje X (1 = derecha)
+        directionY = 0   -- No se mueve en el eje Y
     }
-    -- Aquí podrías agregar el proyectil a una lista de proyectiles para manejarlos
-    -- table.insert(Enemy.projectiles, projectile)
-    print("Enemigo dispara en x: " .. projectile.x .. ", y: " .. projectile.y)  -- Debug
+    table.insert(Enemy.projectiles, projectile)
 end
+
+function Enemy.clear()
+    -- Eliminar todos los enemigos
+    Enemy.enemies = {}
+
+    -- Eliminar todos los proyectiles
+    Enemy.projectiles = {}
+end
+
 
 return Enemy
