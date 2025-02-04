@@ -9,7 +9,6 @@ Player.height = 50  -- Alto del tanque
 
 
 function Player.reload()
-    playReloadSound()
     Weapons.reload(Player.currentWeapon) -- Recargar el arma actual
 end
 
@@ -69,6 +68,7 @@ function Player.drawHealthBar()
 end
 
 function Player.draw(isPaused)
+    Player.drawHealthBar()
     -- Dibujar el arma siempre, incluso si el juego está pausado
     Weapons.draw(Player.currentWeapon, Player.arma_X, Player.arma_Y)
 
@@ -94,9 +94,6 @@ function Player.draw(isPaused)
         local bulletsText = Player.currentWeapon.ammo .. "/" .. Player.currentWeapon.magazineSize
         love.graphics.print("Balas: " .. bulletsText, 10, 10) -- Posición (10, 10)
     end
-
-    -- Dibujar la barra de vida del jugador
-    Player.drawHealthBar()
 end
 
 function Player.shoot(isPaused)

@@ -1,19 +1,20 @@
 anim8 = require "libraries/anim8"
 local Player = require("player")
-
+local Sounds = require("sounds")
 
 Enemy = {}
 Enemy.projectiles = {} -- Lista de proyectiles enemigos
-
 
 Enemy.anchura_enemigo = 75  -- Ancho de cada frame del enemigo (enemigo.png)
 Enemy.altura_enemigo = 100   -- Alto de cada frame del enemigo (enemigo.png)
 Enemy.enemies = {}
 Enemy.spritesheet = nil     -- Imagen del spritesheet del enemigo
 Enemy.shootingSpritesheet = nil -- Imagen del spritesheet de disparo
+Enemy.shooting2Spritesheet = nil -- Imagen del destello de luz al disparar
 Enemy.deathSpritesheet = nil -- Imagen del spritesheet de la animación de muerte
 Enemy.grid = nil            -- Grid del spritesheet del enemigo
 Enemy.shootingGrid = nil    -- Grid del spritesheet de disparo
+Enemy.shooting2Grid = nil   -- Grid del destello de luz al disparar
 Enemy.deathGrid = nil       -- Grid del spritesheet de la muerte
 
 -- Estados del enemigo
@@ -24,6 +25,7 @@ Enemy.STATE_SHOOTING = "shooting"
 function Enemy.load()
     Enemy.spritesheet = love.graphics.newImage("sprites/enemigo.png") -- Spritesheet normal
     Enemy.shootingSpritesheet = love.graphics.newImage("sprites/shooting.png") -- Spritesheet de disparo
+    Enemy.shooting2Spritesheet = love.graphics.newImage("sprites/shooting2.png") -- Destello de luz al disparar
     Enemy.deathSpritesheet = love.graphics.newImage("sprites/muerte.png") -- Spritesheet de muerte
 
     -- Crear el grid para el enemigo (animación normal)
@@ -35,7 +37,6 @@ function Enemy.load()
     )
 
     -- Crear el grid para la animación de disparo (shooting.png)
-    -- Ajusta estos valores según las dimensiones de shooting.png
     local shootingFrameWidth = 32  -- Ancho de cada frame en shooting.png
     local shootingFrameHeight = 32 -- Alto de cada frame en shooting.png
     Enemy.shootingGrid = anim8.newGrid(
@@ -43,6 +44,16 @@ function Enemy.load()
         shootingFrameHeight,
         Enemy.shootingSpritesheet:getWidth(),
         Enemy.shootingSpritesheet:getHeight()
+    )
+
+    -- Crear el grid para el destello de luz al disparar (shooting2.png)
+    local shooting2FrameWidth = 32  -- Ancho de cada frame en shooting2.png
+    local shooting2FrameHeight = 32 -- Alto de cada frame en shooting2.png
+    Enemy.shooting2Grid = anim8.newGrid(
+        shooting2FrameWidth,
+        shooting2FrameHeight,
+        Enemy.shooting2Spritesheet:getWidth(),
+        Enemy.shooting2Spritesheet:getHeight()
     )
 
     -- Crear el grid para la animación de muerte (ajustar tamaño según muerte.png)
@@ -57,8 +68,10 @@ function Enemy.load()
     Enemy.deathAnimationTemplate = anim8.newAnimation(Enemy.deathGrid('1-1', 1), 1, function(anim) anim.finished = true end)
 
     -- Animación de disparo (usando shooting.png)
-    -- Ajusta los frames según shooting.png
-    Enemy.shootingAnimationTemplate = anim8.newAnimation(Enemy.shootingGrid('1-1', 1), 0.1) -- '1-3' significa 3 frames en la fila 1
+    Enemy.shootingAnimationTemplate = anim8.newAnimation(Enemy.shootingGrid('1-1', 1), 0.1)
+
+    -- Animación del destello de luz al disparar (usando shooting2.png)
+    Enemy.shooting2AnimationTemplate = anim8.newAnimation(Enemy.shooting2Grid('1-1', 1), 0.1, function(anim) anim.finished = true end)
 end
 
 function Enemy.spawn()
@@ -72,8 +85,9 @@ function Enemy.spawn()
         state = Enemy.STATE_MOVING,  -- Estado inicial
         animation = anim8.newAnimation(Enemy.grid('2-5', 4), 0.15), -- Animación normal (usando enemigo.png)
         shootingAnimation = Enemy.shootingAnimationTemplate:clone(), -- Animación de disparo (usando shooting.png)
+        shooting2Animation = nil, -- Animación del destello de luz al disparar
         deathAnimation = nil,  -- Animación de muerte específica
-        shootCooldown = 2,     -- Tiempo entre disparos
+        shootCooldown = love.math.random(2, 4),     -- Tiempo entre disparos
         shootTimer = 0,        -- Temporizador para disparar
         health = 3,            -- Vida del enemigo (aguanta 2 disparos, muere al tercero)
         maxHealth = 3          -- Vida máxima del enemigo
@@ -129,42 +143,28 @@ function Enemy.update(dt)
                         Enemy.shoot(enemy)
                     end
                     enemy.animation:update(dt)
-                end
-            end
-        end
 
-        -- **Actualizar proyectiles enemigos**
-        for i = #Enemy.projectiles, 1, -1 do
-            local projectile = Enemy.projectiles[i]
-            projectile.x = projectile.x + projectile.speed * dt  -- Mover hacia la derecha
-        
-            -- Si el proyectil sale de la pantalla, eliminarlo
-            if projectile.x > love.graphics.getWidth() then
-                table.remove(Enemy.projectiles, i)
-            else
-                -- **Detectar colisión con el jugador**
-                if Player.health > 0 and Enemy.checkCollisionWithPlayer(projectile) then
-                    Player.health = Player.health - projectile.damage
-                    table.remove(Enemy.projectiles, i)
-        
-                    -- Si la vida del jugador llega a 0, el juego termina o se reinicia
-
+                    -- Actualizar la animación del destello de luz si está activa
+                    if enemy.shooting2Animation then
+                        enemy.shooting2Animation:update(dt)
+                        if enemy.shooting2Animation.finished then
+                            enemy.shooting2Animation = nil -- Eliminar la animación cuando termine
+                        end
+                    end
                 end
             end
         end
     end        
 end
 
+function Enemy.shoot(enemy)
+    playEnemyShotSound() --sonido de disparoo
+    -- Aplicar daño directamente al jugador
+    Player.health = Player.health - 10  -- Ajusta el daño según sea necesario
 
-function Enemy.checkCollisionWithPlayer(projectile)
-    local playerX, playerY = Player.getPosition()
-    local playerWidth, playerHeight = Player.getSize()
-
-    return projectile.x + 5 > playerX and projectile.x < playerX + playerWidth and
-           projectile.y + 10 > playerY and projectile.y < playerY + playerHeight
+    -- Iniciar la animación del destello de luz
+    enemy.shooting2Animation = Enemy.shooting2AnimationTemplate:clone()
 end
-
-
 
 function Enemy.draw()
     for _, enemy in ipairs(Enemy.enemies) do
@@ -181,28 +181,26 @@ function Enemy.draw()
             )
         else
             if enemy.state == Enemy.STATE_SHOOTING then
-                enemy.animation:draw(Enemy.shootingSpritesheet, enemy.x, (enemy.y + 55))
+                -- Dibujar el destello de luz si está activo
+                if enemy.shooting2Animation then
+                    enemy.shooting2Animation:draw(Enemy.shooting2Spritesheet, enemy.x, (enemy.y+ 55))
+                else
+                    -- Dibujar la animación de disparo normal
+                    enemy.animation:draw(Enemy.shootingSpritesheet, enemy.x, (enemy.y + 55))
+                end
             else
+                -- Dibujar la animación normal
                 enemy.animation:draw(Enemy.spritesheet, enemy.x, enemy.y)
             end
 
             Enemy.drawHealthBar(enemy)
         end
     end
-
-    -- **Dibujar los proyectiles enemigos**
-    love.graphics.setColor(1, 0, 0)  -- Rojo para los proyectiles enemigos
-    for _, projectile in ipairs(Enemy.projectiles) do
-        love.graphics.rectangle("fill", projectile.x, projectile.y, 5, 10)
-    end
-    love.graphics.setColor(1, 1, 1)  -- Restaurar color predeterminado
 end
-
 
 function Enemy.checkClick(x, y, weapon)
     -- Verificar si el arma está recargando
     if weapon.isReloading then
-        print("El arma está recargando, no puedes eliminar enemigos.")
         return false
     end
 
@@ -224,19 +222,6 @@ function Enemy.checkClick(x, y, weapon)
     return false
 end
 
-function Enemy.shoot(enemy)
-    local projectile = {
-        x = enemy.x + Enemy.anchura_enemigo / 2,  -- Inicia desde el centro del enemigo
-        y = enemy.y + Enemy.altura_enemigo / 2,
-        speed = 700,  -- Velocidad del proyectil enemigo
-        damage = 10,  -- Daño que inflige el disparo
-        active = true, -- Activo hasta que salga de la pantalla o impacte
-        directionX = 1,  -- Dirección en el eje X (1 = derecha)
-        directionY = 0   -- No se mueve en el eje Y
-    }
-    table.insert(Enemy.projectiles, projectile)
-end
-
 function Enemy.clear()
     -- Eliminar todos los enemigos
     Enemy.enemies = {}
@@ -244,6 +229,5 @@ function Enemy.clear()
     -- Eliminar todos los proyectiles
     Enemy.projectiles = {}
 end
-
 
 return Enemy

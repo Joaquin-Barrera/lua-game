@@ -2,14 +2,16 @@ local Player = require("player")
 local Enemy = require("enemy")
 local Game = require("game")
 local Sounds = require("sounds")
-local Menu = require("menu") -- Importar el menú
+local Menu = require("menu") -- Importar cosas varias
 
 local currentState = "menu" -- Estado inicial: menú
-local gamePaused = false    -- Estado de pausa
+local gamePaused = false    -- Estado de pausa inicial falso
+local fullscreen = false    -- Estado inicial de pantalla completa
+local screenWidth, screenHeight = 735, 500 -- Resolución base del juego
 
 function love.load()
     love.window.setTitle("Trigger Rush // Trigger Frenzy")    
-    love.window.setMode(800, 600)
+    love.window.setMode(screenWidth, screenHeight, {resizable = true})
     love.mouse.setVisible(false)
 
     -- Inicializar módulos
@@ -44,6 +46,20 @@ function love.update(dt)
 end
 
 function love.draw()
+    -- Calcular la escala para pantalla completa
+    local scaleX, scaleY
+    if fullscreen then
+        local windowWidth, windowHeight = love.graphics.getDimensions()
+        scaleX = windowWidth / screenWidth
+        scaleY = windowHeight / screenHeight
+    else
+        scaleX, scaleY = 1, 1
+    end
+
+    -- Aplicar la transformación de escala
+    love.graphics.push()
+    love.graphics.scale(scaleX, scaleY)
+
     if currentState == "menu" then
         Menu.draw()
     elseif currentState == "play" then
@@ -55,10 +71,10 @@ function love.draw()
         if gamePaused then
             love.mouse.setVisible(true)
             love.graphics.setColor(0, 0, 0, 0.5)
-            love.graphics.rectangle("fill", 0, 0, love.graphics.getWidth(), love.graphics.getHeight())
+            love.graphics.rectangle("fill", 0, 0, screenWidth, screenHeight)
             love.graphics.setColor(1, 1, 1)
-            love.graphics.printf("PAUSA", 0, love.graphics.getHeight() / 2 - 20, love.graphics.getWidth(), "center")
-            love.graphics.printf("Presiona P para reanudar", 0, love.graphics.getHeight() / 2 + 20, love.graphics.getWidth(), "center")
+            love.graphics.printf("PAUSA", 0, screenHeight / 2 - 20, screenWidth, "center")
+            love.graphics.printf("Presiona P para reanudar", 0, screenHeight / 2 + 20, screenWidth, "center")
         else
             love.mouse.setVisible(false)
         end
@@ -66,12 +82,15 @@ function love.draw()
     elseif currentState == "gameover" then
         -- Pantalla de Game Over
         love.graphics.setColor(0, 0, 0)
-        love.graphics.rectangle("fill", 0, 0, love.graphics.getWidth(), love.graphics.getHeight()) -- Fondo negro
+        love.graphics.rectangle("fill", 0, 0, screenWidth, screenHeight) -- Fondo negro
         love.graphics.setColor(1, 0, 0)
-        love.graphics.printf("GAME OVER", 0, love.graphics.getHeight() / 2 - 40, love.graphics.getWidth(), "center")
+        love.graphics.printf("GAME OVER", 0, screenHeight / 2 - 40, screenWidth, "center")
         love.graphics.setColor(1, 1, 1)
-        love.graphics.printf("Presiona R para reiniciar", 0, love.graphics.getHeight() / 2 + 20, love.graphics.getWidth(), "center")
+        love.graphics.printf("Presiona R para reiniciar", 0, screenHeight / 2 + 20, screenWidth, "center")
     end
+
+    -- Restablecer la transformación
+    love.graphics.pop()
 end
 
 function love.keypressed(key)
@@ -105,6 +124,12 @@ function love.keypressed(key)
         if key == "r" or key == "R" then
             resetGame() -- Reiniciar el juego correctamente
         end
+    end
+
+    -- Alternar pantalla completa cuando se presiona la tecla "f"
+    if key == "f" then
+        fullscreen = not fullscreen
+        love.window.setFullscreen(fullscreen)
     end
 end
 

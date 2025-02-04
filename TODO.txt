@@ -25,6 +25,9 @@ Cantidad de balas en la recamara y cooldown a la hora de recargar 🟢
 Menu de pausa 🟡
 Objeto a defender (puede ser un helicóptero, una ciudad, una casa, pensar) 🟡
 Barra de vida tanto para el jugador (objeto a defender) como para los enemigos 🟢
+Pantalla de game over 🟡
+Añadir la logica de daño de los enemigos 🟢
+Sonido de disparo del enemigo 🟢
 
 Cosas a implementar:
 Menu de compra entre rondas 🔴
@@ -32,22 +35,26 @@ Todo tipo de cosas que se puedan comprar para modificar el gameplay como cartas,
 Nuevas armas (pensar cuales pueden ser, tomar nota, sacar inspiracion de enter the dungeon y otros roguelikes)🔴
 Nuevos enemigos (buscar inspiración en otros roguelikes y en weapondearmorgames)🔴
 Animaciones mas suaves para todo 🔴
-Pantalla de game over 🔴
 Pantalla de ronda ganada 🔴
 Animación de apuntado del enemigo 🔴
 Animación de recarga del enemigo 🔴
 Animación de disparo del enemigo 🔴
-Sonido de disparo y recarga del enemigo 🔴
-Añadir la logica de daño de los enemigos 🔴
+Sonido de recarga del enemigo 🔴
 Configurar que cada arma tenga un daño diferente 🔴
 Implementar el uso de 2 armas como máximo que se puedan cambiar en cada ronda 🔴
 Hacer las rondas durar más (spawnear + enemigos por ronda) y que spawneen en un rango más grande (en un intervalo de tiempo más grande)🔴
 Animación de cambio de armas 🔴
 Hacer que el daño no sea fijo sino que salgan numeritos como en el CoD para mantener a los nenes adictos 🔴
+Hacer que los numeros salgan cerca del lugar de impacto y que tengan diferentes colores si pegan en el cuerpo o en la cabeza 🔴
+En weapon no se muestra la bala, solo el flash  del arma y el sonido/chispas cuando golpea el helicóptero, implementar 🔴
+Ajustar la vida del tanque y el daño que realizan los enemigos al mismo 🔴
+Implementar una economía para el juego, poder usar ese dinero para comprar cosas 🔴
+Hacer que el juego se pueda poner en pantalla completa y, eventualmente, en modo ventana también 🔴
+
 
 
 Cosas a arreglar o cambiar:
 
 Mejorar las hitboxes una vez que estén bien definidos los sprites de los enemigos 🟡
-
+Ajustar la vida del tanque y el daño que realizan los enemigos al mismo 🟡
 

@@ -81,11 +81,16 @@ function Weapons.shoot(weapon)
 end
 
 function Weapons.reload(weapon)
+    if weapon.ammo == weapon.magazineSize then 
+        return  -- No recargar si ya está lleno
+    end
+
     if not weapon.isReloading then
         weapon.isReloading = true
         weapon.reloadTimer = weapon.reloadTime
-        -- Aquí podrías reproducir un sonido de recarga
+        playReloadSound()
     end
 end
+
 
 return Weapons
