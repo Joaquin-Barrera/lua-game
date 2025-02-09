@@ -4,7 +4,7 @@ push = require("libraries/push")
 Game.round = 1
 DefendThis = love.graphics.newImage("sprites/tank.png")
 tankX = 400
-tankY = 230
+tankY = 230  --esto define la posicion en x e y del tanque (lo que hay que defender digamos)
 
 -- Resolución nativa del juego
 Game.baseWidth = 640

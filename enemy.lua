@@ -16,6 +16,7 @@ Enemy.grid = nil
 Enemy.shootingGrid = nil
 Enemy.shooting2Grid = nil
 Enemy.deathGrid = nil
+deadTime = 2
 
 -- Estados del enemigo
 Enemy.STATE_MOVING = "moving"
@@ -26,7 +27,7 @@ function Enemy.load()
     Enemy.spritesheet = love.graphics.newImage("sprites/Run.png")
     Enemy.shootingSpritesheet = love.graphics.newImage("sprites/shot_2.png")
     Enemy.shooting2Spritesheet = love.graphics.newImage("sprites/shot_2.png")
-    Enemy.deathSpritesheet = love.graphics.newImage("sprites/muerte.png")
+    Enemy.deathSpritesheet = love.graphics.newImage("sprites/Dead.png")
 
     -- Desactivar el suavizado
     Enemy.spritesheet:setFilter("nearest", "nearest")
@@ -60,14 +61,14 @@ function Enemy.load()
     )
 
     Enemy.deathGrid = anim8.newGrid(
-        64,
-        64,
+        128,
+        128,
         Enemy.deathSpritesheet:getWidth(),
         Enemy.deathSpritesheet:getHeight()
     )
 
     -- Animaciones
-    Enemy.deathAnimationTemplate = anim8.newAnimation(Enemy.deathGrid('1-1', 1), 1, function(anim) anim.finished = true end)
+    Enemy.deathAnimationTemplate = anim8.newAnimation(Enemy.deathGrid('1-4', 1), 0.1, 'pauseAtEnd')
     Enemy.shootingAnimationTemplate = {
         shooting = anim8.newAnimation(Enemy.shootingGrid('1-1', 1), 0.1)
     }
@@ -94,10 +95,10 @@ function Enemy.spawn()
         shootCooldown = love.math.random(2, 4),
         shootTimer = 0,
         health = 3,
-        maxHealth = 3
+        maxHealth = 3,
+        deathStartTime = nil  -- Variable para el tiempo de inicio de la animación de muerte
     })
 end
-
 
 
 function Enemy.drawHealthBar(enemy)
@@ -124,8 +125,15 @@ function Enemy.update(dt)
             if enemy.dead then
                 if enemy.deathAnimation then
                     enemy.deathAnimation:update(dt)
-                    if enemy.deathAnimation.finished then
-                        table.remove(Enemy.enemies, i)
+                    
+                    -- Si ha comenzado la animación de muerte, contamos el tiempo para eliminar al enemigo
+                    if enemy.deathStartTime == nil then
+                        enemy.deathStartTime = love.timer.getTime()
+                    end
+
+                    -- Verificamos si el tiempo de desaparición ha pasado
+                    if love.timer.getTime() - enemy.deathStartTime >= deadTime then
+                        table.remove(Enemy.enemies, i)  -- Eliminar al enemigo
                     end
                 end
             else
@@ -211,9 +219,6 @@ function Enemy.draw()
     end
     push:apply("end")
 end
-
-
-
 
 
 function Enemy.checkClick(x, y, weapon)
