@@ -1,21 +1,21 @@
+local push = require "libraries/push"
 anim8 = require "libraries/anim8"
 local Player = require("player")
 local Sounds = require("sounds")
 
 Enemy = {}
 Enemy.projectiles = {} -- Lista de proyectiles enemigos
-
-Enemy.anchura_enemigo = 75  -- Ancho de cada frame del enemigo (enemigo.png)
-Enemy.altura_enemigo = 100   -- Alto de cada frame del enemigo (enemigo.png)
+Enemy.anchura_enemigo = 75
+Enemy.altura_enemigo = 100
 Enemy.enemies = {}
-Enemy.spritesheet = nil     -- Imagen del spritesheet del enemigo
-Enemy.shootingSpritesheet = nil -- Imagen del spritesheet de disparo
-Enemy.shooting2Spritesheet = nil -- Imagen del destello de luz al disparar
-Enemy.deathSpritesheet = nil -- Imagen del spritesheet de la animación de muerte
-Enemy.grid = nil            -- Grid del spritesheet del enemigo
-Enemy.shootingGrid = nil    -- Grid del spritesheet de disparo
-Enemy.shooting2Grid = nil   -- Grid del destello de luz al disparar
-Enemy.deathGrid = nil       -- Grid del spritesheet de la muerte
+Enemy.spritesheet = nil
+Enemy.shootingSpritesheet = nil
+Enemy.shooting2Spritesheet = nil
+Enemy.deathSpritesheet = nil
+Enemy.grid = nil
+Enemy.shootingGrid = nil
+Enemy.shooting2Grid = nil
+Enemy.deathGrid = nil
 
 -- Estados del enemigo
 Enemy.STATE_MOVING = "moving"
@@ -23,22 +23,26 @@ Enemy.STATE_SHOOTING = "shooting"
 
 -- Cargar los spritesheets y definir las animaciones
 function Enemy.load()
-    Enemy.spritesheet = love.graphics.newImage("sprites/enemigo.png") -- Spritesheet normal
-    Enemy.shootingSpritesheet = love.graphics.newImage("sprites/shooting.png") -- Spritesheet de disparo
-    Enemy.shooting2Spritesheet = love.graphics.newImage("sprites/shooting2.png") -- Destello de luz al disparar
-    Enemy.deathSpritesheet = love.graphics.newImage("sprites/muerte.png") -- Spritesheet de muerte
+    Enemy.spritesheet = love.graphics.newImage("sprites/enemigo.png")
+    Enemy.shootingSpritesheet = love.graphics.newImage("sprites/enemigooriginal.png")
+    Enemy.shooting2Spritesheet = love.graphics.newImage("sprites/shooting2.png")
+    Enemy.deathSpritesheet = love.graphics.newImage("sprites/muerte.png")
 
-    -- Crear el grid para el enemigo (animación normal)
+      -- Desactivar el suavizado
+      Enemy.spritesheet:setFilter("nearest", "nearest")
+      Enemy.shootingSpritesheet:setFilter("nearest", "nearest")
+      Enemy.shooting2Spritesheet:setFilter("nearest", "nearest")
+      Enemy.deathSpritesheet:setFilter("nearest", "nearest")
+
     Enemy.grid = anim8.newGrid(
-        Enemy.anchura_enemigo,  -- Ancho de cada frame (enemigo.png)
-        Enemy.altura_enemigo,   -- Alto de cada frame (enemigo.png)
-        Enemy.spritesheet:getWidth(),
+        Enemy.anchura_enemigo, 
+        Enemy.altura_enemigo, 
+        Enemy.spritesheet:getWidth(), 
         Enemy.spritesheet:getHeight()
     )
 
-    -- Crear el grid para la animación de disparo (shooting.png)
-    local shootingFrameWidth = 32  -- Ancho de cada frame en shooting.png
-    local shootingFrameHeight = 32 -- Alto de cada frame en shooting.png
+    local shootingFrameWidth = 32
+    local shootingFrameHeight = 32
     Enemy.shootingGrid = anim8.newGrid(
         shootingFrameWidth,
         shootingFrameHeight,
@@ -46,9 +50,8 @@ function Enemy.load()
         Enemy.shootingSpritesheet:getHeight()
     )
 
-    -- Crear el grid para el destello de luz al disparar (shooting2.png)
-    local shooting2FrameWidth = 32  -- Ancho de cada frame en shooting2.png
-    local shooting2FrameHeight = 32 -- Alto de cada frame en shooting2.png
+    local shooting2FrameWidth = 32
+    local shooting2FrameHeight = 32
     Enemy.shooting2Grid = anim8.newGrid(
         shooting2FrameWidth,
         shooting2FrameHeight,
@@ -56,60 +59,51 @@ function Enemy.load()
         Enemy.shooting2Spritesheet:getHeight()
     )
 
-    -- Crear el grid para la animación de muerte (ajustar tamaño según muerte.png)
     Enemy.deathGrid = anim8.newGrid(
-        32, -- Ancho de cada frame de la animación de muerte
-        32, -- Alto de cada frame de la animación de muerte
+        64,
+        64,
         Enemy.deathSpritesheet:getWidth(),
         Enemy.deathSpritesheet:getHeight()
     )
 
-    -- Animación de muerte (asumiendo que muerte.png tiene 4 frames en una fila)
     Enemy.deathAnimationTemplate = anim8.newAnimation(Enemy.deathGrid('1-1', 1), 1, function(anim) anim.finished = true end)
-
-    -- Animación de disparo (usando shooting.png)
     Enemy.shootingAnimationTemplate = anim8.newAnimation(Enemy.shootingGrid('1-1', 1), 0.1)
-
-    -- Animación del destello de luz al disparar (usando shooting2.png)
     Enemy.shooting2AnimationTemplate = anim8.newAnimation(Enemy.shooting2Grid('1-1', 1), 0.1, function(anim) anim.finished = true end)
 end
 
 function Enemy.spawn()
     table.insert(Enemy.enemies, {
         x = love.math.random(-50, -250),
-        y = 310,
+        y = 250,
         speed = love.math.random(50, 200),
         stopX = love.math.random(1, 300),
         stopped = false,
         dead = false,
-        state = Enemy.STATE_MOVING,  -- Estado inicial
-        animation = anim8.newAnimation(Enemy.grid('2-5', 4), 0.15), -- Animación normal (usando enemigo.png)
-        shootingAnimation = Enemy.shootingAnimationTemplate:clone(), -- Animación de disparo (usando shooting.png)
-        shooting2Animation = nil, -- Animación del destello de luz al disparar
-        deathAnimation = nil,  -- Animación de muerte específica
-        shootCooldown = love.math.random(2, 4),     -- Tiempo entre disparos
-        shootTimer = 0,        -- Temporizador para disparar
-        health = 3,            -- Vida del enemigo (aguanta 2 disparos, muere al tercero)
-        maxHealth = 3          -- Vida máxima del enemigo
+        state = Enemy.STATE_MOVING,
+        animation = anim8.newAnimation(Enemy.grid('2-5', 4), 0.15),
+        shootingAnimation = Enemy.shootingAnimationTemplate:clone(),
+        shooting2Animation = nil,
+        deathAnimation = nil,
+        shootCooldown = love.math.random(2, 4),
+        shootTimer = 0,
+        health = 3,
+        maxHealth = 3
     })
 end
 
 function Enemy.drawHealthBar(enemy)
-    local x = enemy.x  -- Posición X de la barra de vida (encima del enemigo)
-    local y = enemy.y + 100  -- Posición Y de la barra de vida
-    local width = Enemy.anchura_enemigo  -- Ancho de la barra de vida
-    local height = 5  -- Alto de la barra de vida
+    local x = enemy.x
+    local y = enemy.y + 100
+    local width = Enemy.anchura_enemigo
+    local height = 5
 
-    -- Dibujar la vida faltante (fondo rojo)
-    love.graphics.setColor(1, 0, 0)  -- Rojo
+    love.graphics.setColor(1, 0, 0)
     love.graphics.rectangle("fill", x, y, width, height)
 
-    -- Dibujar la vida actual (verde)
     local healthWidth = (enemy.health / enemy.maxHealth) * width
-    love.graphics.setColor(0, 1, 0)  -- Verde
+    love.graphics.setColor(0, 1, 0)
     love.graphics.rectangle("fill", x, y, healthWidth, height)
 
-    -- Restaurar el color predeterminado
     love.graphics.setColor(1, 1, 1)
 end
 
@@ -144,11 +138,10 @@ function Enemy.update(dt)
                     end
                     enemy.animation:update(dt)
 
-                    -- Actualizar la animación del destello de luz si está activa
                     if enemy.shooting2Animation then
                         enemy.shooting2Animation:update(dt)
                         if enemy.shooting2Animation.finished then
-                            enemy.shooting2Animation = nil -- Eliminar la animación cuando termine
+                            enemy.shooting2Animation = nil
                         end
                     end
                 end
@@ -158,18 +151,27 @@ function Enemy.update(dt)
 end
 
 function Enemy.shoot(enemy)
-    playEnemyShotSound() --sonido de disparoo
-    -- Aplicar daño directamente al jugador
-    Player.health = Player.health - 10  -- Ajusta el daño según sea necesario
+    playEnemyShotSound()
+    Player.health = Player.health - 10
 
-    -- Iniciar la animación del destello de luz
     enemy.shooting2Animation = Enemy.shooting2AnimationTemplate:clone()
 end
 
 function Enemy.draw()
+    push:apply("start")  -- Iniciar la escala con push
+
+    -- Determina el factor de escala exacto en función de la resolución
+    local scaleX, scaleY = push:getDimensions()
+    local scaleFactor = scaleX / 640  -- La resolución base es 640x360, así que escalamos en función de eso
+
+    -- Asegurémonos de que la escala sea un múltiplo entero (por ejemplo, 2x, 3x, etc.)
+    if scaleFactor % 1 ~= 0 then
+        scaleFactor = math.floor(scaleFactor)  -- Forzamos la escala a ser un valor entero
+    end
+
     for _, enemy in ipairs(Enemy.enemies) do
         if enemy.dead and enemy.deathAnimation then
-            local scale = 1  
+            local scale = scaleFactor  -- Usamos la escala exacta
             local offsetX = Enemy.anchura_enemigo * ((1 - scale) + 0.3)
             local offsetY = Enemy.altura_enemigo * (1 - scale - 0.1)
 
@@ -181,39 +183,43 @@ function Enemy.draw()
             )
         else
             if enemy.state == Enemy.STATE_SHOOTING then
-                -- Dibujar el destello de luz si está activo
                 if enemy.shooting2Animation then
-                    enemy.shooting2Animation:draw(Enemy.shooting2Spritesheet, enemy.x, (enemy.y+ 55))
+                    enemy.shooting2Animation:draw(Enemy.shooting2Spritesheet, enemy.x, (enemy.y + 55), 0, scaleFactor, scaleFactor)
                 else
-                    -- Dibujar la animación de disparo normal
-                    enemy.animation:draw(Enemy.shootingSpritesheet, enemy.x, (enemy.y + 55))
+                    enemy.animation:draw(Enemy.shootingSpritesheet, enemy.x, (enemy.y + 55), 0, scaleFactor, scaleFactor)
                 end
             else
-                -- Dibujar la animación normal
-                enemy.animation:draw(Enemy.spritesheet, enemy.x, enemy.y)
+                enemy.animation:draw(Enemy.spritesheet, enemy.x, enemy.y, 0, scaleFactor, scaleFactor)
             end
 
             Enemy.drawHealthBar(enemy)
         end
     end
+
+    push:apply("end")  -- Finalizar la escala con push
 end
 
+
+
 function Enemy.checkClick(x, y, weapon)
-    -- Verificar si el arma está recargando
     if weapon.isReloading then
+        return false
+    end
+
+    -- Convertir coordenadas del mouse a la escala original
+    local worldX, worldY = push:toGame(x, y)
+    if not worldX or not worldY then
         return false
     end
 
     for i = #Enemy.enemies, 1, -1 do
         local enemy = Enemy.enemies[i]
-        if not enemy.dead and x >= enemy.x and x <= enemy.x + Enemy.anchura_enemigo and y >= enemy.y and y <= enemy.y + Enemy.altura_enemigo then
-            -- Reducir la vida del enemigo
+        if not enemy.dead and worldX >= enemy.x and worldX <= enemy.x + Enemy.anchura_enemigo and worldY >= enemy.y and worldY <= enemy.y + Enemy.altura_enemigo then
             enemy.health = enemy.health - 1
 
-            -- Verificar si el enemigo murió
             if enemy.health <= 0 then
                 enemy.dead = true
-                enemy.deathAnimation = Enemy.deathAnimationTemplate:clone() -- Clonar animación para que sea independiente
+                enemy.deathAnimation = Enemy.deathAnimationTemplate:clone()
             end
 
             return true
@@ -222,11 +228,9 @@ function Enemy.checkClick(x, y, weapon)
     return false
 end
 
-function Enemy.clear()
-    -- Eliminar todos los enemigos
-    Enemy.enemies = {}
 
-    -- Eliminar todos los proyectiles
+function Enemy.clear()
+    Enemy.enemies = {}
     Enemy.projectiles = {}
 end
 

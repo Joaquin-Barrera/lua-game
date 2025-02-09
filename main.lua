@@ -2,30 +2,43 @@ local Player = require("player")
 local Enemy = require("enemy")
 local Game = require("game")
 local Sounds = require("sounds")
-local Menu = require("menu") -- Importar cosas varias
+local Menu = require("menu")
+push = require("libraries/push") -- Ahora en minúsculas para consistencia
 
-local currentState = "menu" -- Estado inicial: menú
-local gamePaused = false    -- Estado de pausa inicial falso
-local fullscreen = false    -- Estado inicial de pantalla completa
-local screenWidth, screenHeight = 735, 500 -- Resolución base del juego
+WINDOW_WIDTH, WINDOW_HEIGHT = love.window.getDesktopDimensions()
+WINDOW_WIDTH, WINDOW_HEIGHT = WINDOW_WIDTH * 0.8, WINDOW_HEIGHT * 0.8
+
+VIRTUAL_WIDTH, VIRTUAL_HEIGHT = 640 , 360
+
+local currentState = "menu"
+local gamePaused = false
+local fullscreen = false -- Ahora empieza en ventana
+local screenWidth, screenHeight = VIRTUAL_WIDTH, VIRTUAL_HEIGHT
 
 function love.load()
-    love.window.setTitle("Trigger Rush // Trigger Frenzy")    
-    love.window.setMode(screenWidth, screenHeight, {resizable = true})
+    love.graphics.setDefaultFilter("nearest", "nearest")
+    love.window.setTitle("Trigger Rush // Trigger Frenzy")
+
+    push:setupScreen(VIRTUAL_WIDTH, VIRTUAL_HEIGHT, WINDOW_WIDTH, WINDOW_HEIGHT, {
+        fullscreen = fullscreen,
+        vsync = true,
+        resizable = true
+    })
+
     love.mouse.setVisible(false)
 
     -- Inicializar módulos
     Player.load()
     Enemy.load()
-    Menu.load() -- Cargar el menú
+    Menu.load()
 end
 
 function resetGame()
-    Player.load()  -- Reinicia la vida y posición del jugador
-    Enemy.clear() -- Elimina todos los enemigos
-    Enemy.load()   -- Carga los enemigos de nuevo
-    Game.round = 0 --por algun motivo tengo que ponerlo en 0 porque si lo pongo en 1 empieza desde la ronda 2, cosa de mandinga
-    currentState = "play" -- Regresar al gameplay desde el inicio
+    Player.load()
+    Enemy.clear()
+    Enemy.load()
+    Game.round = 0
+    currentState = "play"
 end
 
 function love.update(dt)
@@ -33,11 +46,10 @@ function love.update(dt)
         Menu.update(dt)
     elseif currentState == "play" then
         if not gamePaused then
-            Player.update(dt, gamePaused)
+            Player.update(dt, gamePaused, screenWidth, screenHeight)
             Enemy.update(dt)
             Game.update(dt)
 
-            -- Verificar si el jugador ha perdido
             if Player.health <= 0 then
                 currentState = "gameover"
             end
@@ -45,21 +57,14 @@ function love.update(dt)
     end
 end
 
+function love.resize(w, h)
+    push:resize(w, h)
+end
+
 function love.draw()
-    -- Calcular la escala para pantalla completa
-    local scaleX, scaleY
-    if fullscreen then
-        local windowWidth, windowHeight = love.graphics.getDimensions()
-        scaleX = windowWidth / screenWidth
-        scaleY = windowHeight / screenHeight
-    else
-        scaleX, scaleY = 1, 1
-    end
-
-    -- Aplicar la transformación de escala
-    love.graphics.push()
-    love.graphics.scale(scaleX, scaleY)
-
+    Game.background = love.graphics.newImage("sprites/ciudadprueba2.png")
+   
+    -- Dibujar la interfaz y los objetos del juego
     if currentState == "menu" then
         Menu.draw()
     elseif currentState == "play" then
@@ -71,26 +76,23 @@ function love.draw()
         if gamePaused then
             love.mouse.setVisible(true)
             love.graphics.setColor(0, 0, 0, 0.5)
-            love.graphics.rectangle("fill", 0, 0, screenWidth, screenHeight)
+            love.graphics.rectangle("fill", 0, 0, love.graphics.getWidth(), love.graphics.getHeight()) 
             love.graphics.setColor(1, 1, 1)
-            love.graphics.printf("PAUSA", 0, screenHeight / 2 - 20, screenWidth, "center")
-            love.graphics.printf("Presiona P para reanudar", 0, screenHeight / 2 + 20, screenWidth, "center")
+            love.graphics.printf("PAUSA", 0, love.graphics.getHeight() / 2 - 20, love.graphics.getWidth(), "center")
+            love.graphics.printf("Presiona P para reanudar", 0, love.graphics.getHeight() / 2 + 20, love.graphics.getWidth(), "center")
         else
             love.mouse.setVisible(false)
         end
-
     elseif currentState == "gameover" then
         -- Pantalla de Game Over
         love.graphics.setColor(0, 0, 0)
-        love.graphics.rectangle("fill", 0, 0, screenWidth, screenHeight) -- Fondo negro
+        love.graphics.rectangle("fill", 0, 0, VIRTUAL_WIDTH, VIRTUAL_HEIGHT)
         love.graphics.setColor(1, 0, 0)
-        love.graphics.printf("GAME OVER", 0, screenHeight / 2 - 40, screenWidth, "center")
+        love.graphics.printf("GAME OVER", 0, VIRTUAL_HEIGHT / 2 - 40, VIRTUAL_WIDTH, "center")
         love.graphics.setColor(1, 1, 1)
-        love.graphics.printf("Presiona R para reiniciar", 0, screenHeight / 2 + 20, screenWidth, "center")
+        love.graphics.printf("Presiona R para reiniciar", 0, VIRTUAL_HEIGHT / 2 + 20, VIRTUAL_WIDTH, "center")
     end
 
-    -- Restablecer la transformación
-    love.graphics.pop()
 end
 
 function love.keypressed(key)
@@ -101,8 +103,8 @@ function love.keypressed(key)
             Player.switchWeapon("shotgun")
         elseif key == "3" then
             Player.switchWeapon("punch")
-        elseif key == "r" or key == "R" then -- Detectar la tecla R
-            Player.reload() -- Recargar el arma actual
+        elseif key == "r" then
+            Player.reload()
         end
     end
 
@@ -117,34 +119,32 @@ function love.keypressed(key)
             love.event.quit()
         end
     elseif currentState == "play" then
-        if key == "p" or key == "P" then
+        if key == "p" then
             gamePaused = not gamePaused
         end
     elseif currentState == "gameover" then
-        if key == "r" or key == "R" then
-            resetGame() -- Reiniciar el juego correctamente
+        if key == "r" then
+            resetGame()
         end
     end
 
-    -- Alternar pantalla completa cuando se presiona la tecla "f"
+    -- Alternar entre pantalla completa y ventana
     if key == "f" then
         fullscreen = not fullscreen
-        love.window.setFullscreen(fullscreen)
+        push:setupScreen(VIRTUAL_WIDTH, VIRTUAL_HEIGHT, WINDOW_WIDTH, WINDOW_HEIGHT, {
+            fullscreen = fullscreen,
+            resizable = true,
+            vsync = true
+        })
     end
 end
 
 function love.mousepressed(x, y, button)
     if currentState == "play" and button == 1 then
         if not gamePaused then
-            -- Obtener el arma actual del jugador
             local weapon = Player.getCurrentWeapon()
-
-            -- Intentar disparar
             Player.shoot()
-            
-            -- Intentar eliminar enemigos
-            if Enemy.checkClick(x, y, weapon) then
-            end
+            Enemy.checkClick(x, y, weapon)
         end
     end
 end

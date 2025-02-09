@@ -14,13 +14,30 @@ function pause.update(dt)
 end
 
 function pause.draw()
-    if pause.isPaused then
-        love.graphics.setColor(0, 0, 0, 0.5) -- Fondo semitransparente
-        love.graphics.rectangle("fill", 0, 0, love.graphics.getWidth(), love.graphics.getHeight())
-        love.graphics.setColor(1, 1, 1) -- Color del texto
-        love.graphics.printf("PAUSA", 0, love.graphics.getHeight() / 2 - 20, love.graphics.getWidth(), "center")
-        love.graphics.printf("Presiona P para reanudar", 0, love.graphics.getHeight() / 2 + 20, love.graphics.getWidth(), "center")
-    end
+    local screenWidth, screenHeight = love.graphics.getWidth(), love.graphics.getHeight()
+
+    -- Definir los textos
+    local pauseText = "Pausa"
+    local resumeText = "Presiona Enter para continuar"
+
+    -- Obtener dimensiones del texto
+    local font = love.graphics.getFont()
+    local textWidthPause = font:getWidth(pauseText)
+    local textHeightPause = font:getHeight()
+    local textWidthResume = font:getWidth(resumeText)
+    local textHeightResume = font:getHeight()
+
+    -- Calcular posiciones centradas
+    local pauseX = (screenWidth - textWidthPause) / 2
+    local pauseY = (screenHeight / 2) - textHeightPause - 20
+
+    local resumeX = (screenWidth - textWidthResume) / 2
+    local resumeY = (screenHeight / 2) + 20
+
+    -- Dibujar los textos correctamente centrados
+    love.graphics.printf(pauseText, pauseX, pauseY, textWidthPause, "left")
+    love.graphics.printf(resumeText, resumeX, resumeY, textWidthResume, "left")
 end
+
 
 return pause

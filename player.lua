@@ -1,11 +1,14 @@
 local Player = {}
 local Weapons = require("weapons") -- Importar el módulo de armas
+local push = require("libraries/push") -- Ahora en minúsculas para consistencia
 
 -- Posición real del tanque (ajústala según su ubicación en la pantalla)
-Player.x = 570  -- Cambia este valor según la ubicación del tanque
-Player.y = 350  -- Ajusta la altura según el terreno
+Player.x = 0  -- Cambia este valor según la ubicación del tanque
+Player.y = 0  -- Ajusta la altura según el terreno
 Player.width = 50  -- Ancho del tanque
 Player.height = 50  -- Alto del tanque
+
+local screenWidth, screenHeight = love.graphics.getWidth(), love.graphics.getHeight() 
 
 
 function Player.reload()
@@ -34,8 +37,8 @@ function Player.load()
     Player.font = love.graphics.newFont(18) -- Tamaño de la fuente
 
     -- Vida del jugador
-    Player.health = 100
-    Player.maxHealth = 100
+    Player.health = 1000
+    Player.maxHealth = 1000
 end
 
 function Player.update(dt, isPaused)
@@ -48,31 +51,33 @@ function Player.update(dt, isPaused)
     end
 end
 
-function Player.drawHealthBar()
-    local x = 100  -- Posición X de la barra de vida
-    local y = 450  -- Posición Y de la barra de vida (debajo del texto de balas)
+function Player.drawHealthBar(x, y)
     local width = 200  -- Ancho de la barra de vida
     local height = 20  -- Alto de la barra de vida
 
     -- Dibujar la vida faltante (fondo rojo)
     love.graphics.setColor(1, 0, 0)  -- Rojo
-    love.graphics.rectangle("fill", tankX, tankY, width, height)
+    love.graphics.rectangle("fill", x, y, width, height)
 
     -- Dibujar la vida actual (verde)
     local healthWidth = (Player.health / Player.maxHealth) * width
     love.graphics.setColor(0, 1, 0)  -- Verde
-    love.graphics.rectangle("fill", tankX, tankY, healthWidth, height)
+    love.graphics.rectangle("fill", x, y, healthWidth, height)
 
     -- Restaurar el color predeterminado
     love.graphics.setColor(1, 1, 1)
 end
 
+
 function Player.draw(isPaused)
-    Player.drawHealthBar()
-    -- Dibujar el arma siempre, incluso si el juego está pausado
+    -- Dibujar la barra de vida en la posición del jugador
+
+    Player.drawHealthBar((love.graphics.getWidth()-350), (love.graphics.getHeight()-250)) -- ESTO MODIFICA LA ALTURA DE LA BARRA DE VIDA
+
+    -- Dibujar el arma
     Weapons.draw(Player.currentWeapon, Player.arma_X, Player.arma_Y)
 
-    -- Dibujar la mira personalizada solo si el juego no está pausado
+    -- Dibujar la mira si el juego no está pausado
     if not isPaused then
         local mouseX, mouseY = love.mouse.getPosition()
         local scaleFactor = 0.5
@@ -80,21 +85,21 @@ function Player.draw(isPaused)
         local cursorHeight = cursorSprite:getHeight() * scaleFactor
 
         love.graphics.draw(cursorSprite, mouseX, mouseY, 0, scaleFactor, scaleFactor, cursorWidth / (scaleFactor * 2), cursorHeight / (scaleFactor * 2))
+
     end
 
-    -- Dibujar la cantidad de balas o el estado de recarga
-    love.graphics.setFont(Player.font) -- Establecer la fuente
-    love.graphics.setColor(1, 1, 1) -- Color blanco
+    -- Dibujar el contador de balas
+    love.graphics.setFont(Player.font)
+    love.graphics.setColor(1, 1, 1)
 
     if Player.currentWeapon.isReloading then
-        -- Mostrar "Recargando..." mientras el arma está recargando
-        love.graphics.print("Recargando...", 10, 10) -- Posición (10, 10)
+        love.graphics.print("Recargando...", 10, 10)
     else
-        -- Mostrar la cantidad de balas (ejemplo: "5/10")
         local bulletsText = Player.currentWeapon.ammo .. "/" .. Player.currentWeapon.magazineSize
-        love.graphics.print("Balas: " .. bulletsText, 10, 10) -- Posición (10, 10)
+        love.graphics.print("Balas: " .. bulletsText, 10, 10)
     end
 end
+
 
 function Player.shoot(isPaused)
     -- Solo disparar si el juego no está pausado
