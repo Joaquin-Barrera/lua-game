@@ -5,8 +5,8 @@ local Sounds = require("sounds")
 
 Enemy = {}
 Enemy.projectiles = {} -- Lista de proyectiles enemigos
-Enemy.anchura_enemigo = 75
-Enemy.altura_enemigo = 100
+Enemy.anchura_enemigo = 1024 / 8  -- 128 píxeles por frame
+Enemy.altura_enemigo = 128        -- 128 píxeles de alto
 Enemy.enemies = {}
 Enemy.spritesheet = nil
 Enemy.shootingSpritesheet = nil
@@ -23,16 +23,16 @@ Enemy.STATE_SHOOTING = "shooting"
 
 -- Cargar los spritesheets y definir las animaciones
 function Enemy.load()
-    Enemy.spritesheet = love.graphics.newImage("sprites/enemigo.png")
-    Enemy.shootingSpritesheet = love.graphics.newImage("sprites/enemigooriginal.png")
-    Enemy.shooting2Spritesheet = love.graphics.newImage("sprites/shooting2.png")
+    Enemy.spritesheet = love.graphics.newImage("sprites/Run.png")
+    Enemy.shootingSpritesheet = love.graphics.newImage("sprites/shot_2.png")
+    Enemy.shooting2Spritesheet = love.graphics.newImage("sprites/shot_2.png")
     Enemy.deathSpritesheet = love.graphics.newImage("sprites/muerte.png")
 
-      -- Desactivar el suavizado
-      Enemy.spritesheet:setFilter("nearest", "nearest")
-      Enemy.shootingSpritesheet:setFilter("nearest", "nearest")
-      Enemy.shooting2Spritesheet:setFilter("nearest", "nearest")
-      Enemy.deathSpritesheet:setFilter("nearest", "nearest")
+    -- Desactivar el suavizado
+    Enemy.spritesheet:setFilter("nearest", "nearest")
+    Enemy.shootingSpritesheet:setFilter("nearest", "nearest")
+    Enemy.shooting2Spritesheet:setFilter("nearest", "nearest")
+    Enemy.deathSpritesheet:setFilter("nearest", "nearest")
 
     Enemy.grid = anim8.newGrid(
         Enemy.anchura_enemigo, 
@@ -41,8 +41,8 @@ function Enemy.load()
         Enemy.spritesheet:getHeight()
     )
 
-    local shootingFrameWidth = 32
-    local shootingFrameHeight = 32
+    local shootingFrameWidth = 128 
+    local shootingFrameHeight = 128
     Enemy.shootingGrid = anim8.newGrid(
         shootingFrameWidth,
         shootingFrameHeight,
@@ -50,8 +50,8 @@ function Enemy.load()
         Enemy.shootingSpritesheet:getHeight()
     )
 
-    local shooting2FrameWidth = 32
-    local shooting2FrameHeight = 32
+    local shooting2FrameWidth = 128
+    local shooting2FrameHeight = 128
     Enemy.shooting2Grid = anim8.newGrid(
         shooting2FrameWidth,
         shooting2FrameHeight,
@@ -66,22 +66,29 @@ function Enemy.load()
         Enemy.deathSpritesheet:getHeight()
     )
 
+    -- Animaciones
     Enemy.deathAnimationTemplate = anim8.newAnimation(Enemy.deathGrid('1-1', 1), 1, function(anim) anim.finished = true end)
-    Enemy.shootingAnimationTemplate = anim8.newAnimation(Enemy.shootingGrid('1-1', 1), 0.1)
-    Enemy.shooting2AnimationTemplate = anim8.newAnimation(Enemy.shooting2Grid('1-1', 1), 0.1, function(anim) anim.finished = true end)
+    Enemy.shootingAnimationTemplate = {
+        shooting = anim8.newAnimation(Enemy.shootingGrid('1-1', 1), 0.1)
+    }
+    Enemy.shooting2AnimationTemplate = anim8.newAnimation(Enemy.shooting2Grid('1-5', 1), 0.1, 'pauseAtEnd') -- Frame 1 al 4
 end
 
+
 function Enemy.spawn()
+    local baseHeight = 360  -- La altura base del juego
+    local screenHeight = push:getHeight()  -- Altura escalada actual
+
     table.insert(Enemy.enemies, {
         x = love.math.random(-50, -250),
-        y = 250,
+        y = screenHeight * (220 / baseHeight), -- Escalar en proporción a la altura
         speed = love.math.random(50, 200),
         stopX = love.math.random(1, 300),
         stopped = false,
         dead = false,
         state = Enemy.STATE_MOVING,
-        animation = anim8.newAnimation(Enemy.grid('2-5', 4), 0.15),
-        shootingAnimation = Enemy.shootingAnimationTemplate:clone(),
+        animation = anim8.newAnimation(Enemy.grid('1-8', 1), 0.1),  -- Inicialización de la animación de movimiento
+        shootingAnimation = Enemy.shootingAnimationTemplate.shooting:clone(),  -- Inicializar la animación de disparo
         shooting2Animation = nil,
         deathAnimation = nil,
         shootCooldown = love.math.random(2, 4),
@@ -90,6 +97,8 @@ function Enemy.spawn()
         maxHealth = 3
     })
 end
+
+
 
 function Enemy.drawHealthBar(enemy)
     local x = enemy.x
@@ -126,17 +135,21 @@ function Enemy.update(dt)
                         if enemy.x >= enemy.stopX then
                             enemy.stopped = true
                             enemy.state = Enemy.STATE_SHOOTING
-                            enemy.animation = enemy.shootingAnimation
+                            enemy.animation = enemy.shootingAnimation  -- Cambiar a la animación de disparo
                         end
                     end
-                    enemy.animation:update(dt)
+                    if enemy.animation then
+                        enemy.animation:update(dt)
+                    end
                 elseif enemy.state == Enemy.STATE_SHOOTING then
                     enemy.shootTimer = enemy.shootTimer + dt
                     if enemy.shootTimer >= enemy.shootCooldown then
                         enemy.shootTimer = 0
                         Enemy.shoot(enemy)
                     end
-                    enemy.animation:update(dt)
+                    if enemy.animation then
+                        enemy.animation:update(dt)
+                    end
 
                     if enemy.shooting2Animation then
                         enemy.shooting2Animation:update(dt)
@@ -150,28 +163,25 @@ function Enemy.update(dt)
     end        
 end
 
+
 function Enemy.shoot(enemy)
     playEnemyShotSound()
     Player.health = Player.health - 10
 
+    -- Clonar la animación de disparo 2
     enemy.shooting2Animation = Enemy.shooting2AnimationTemplate:clone()
 end
 
+
 function Enemy.draw()
-    push:apply("start")  -- Iniciar la escala con push
-
-    -- Determina el factor de escala exacto en función de la resolución
+    push:apply("start")
     local scaleX, scaleY = push:getDimensions()
-    local scaleFactor = scaleX / 640  -- La resolución base es 640x360, así que escalamos en función de eso
-
-    -- Asegurémonos de que la escala sea un múltiplo entero (por ejemplo, 2x, 3x, etc.)
-    if scaleFactor % 1 ~= 0 then
-        scaleFactor = math.floor(scaleFactor)  -- Forzamos la escala a ser un valor entero
-    end
+    local baseWidth, baseHeight = 640, 360
+    local scaleFactor = math.min(scaleX / baseWidth, scaleY / baseHeight) -- Escalar proporcionalmente
 
     for _, enemy in ipairs(Enemy.enemies) do
         if enemy.dead and enemy.deathAnimation then
-            local scale = scaleFactor  -- Usamos la escala exacta
+            local scale = scaleFactor
             local offsetX = Enemy.anchura_enemigo * ((1 - scale) + 0.3)
             local offsetY = Enemy.altura_enemigo * (1 - scale - 0.1)
 
@@ -182,22 +192,27 @@ function Enemy.draw()
                 scale, scale
             )
         else
+            local drawY = enemy.y * (scaleY / baseHeight) -- Ajustar la altura
+
             if enemy.state == Enemy.STATE_SHOOTING then
                 if enemy.shooting2Animation then
-                    enemy.shooting2Animation:draw(Enemy.shooting2Spritesheet, enemy.x, (enemy.y + 55), 0, scaleFactor, scaleFactor)
-                else
-                    enemy.animation:draw(Enemy.shootingSpritesheet, enemy.x, (enemy.y + 55), 0, scaleFactor, scaleFactor)
+                    enemy.shooting2Animation:draw(Enemy.shooting2Spritesheet, enemy.x, drawY , 0, scaleFactor, scaleFactor)
+                elseif enemy.shootingAnimation then
+                    enemy.shootingAnimation:draw(Enemy.shootingSpritesheet, enemy.x, drawY, 0, scaleFactor, scaleFactor)
                 end
             else
-                enemy.animation:draw(Enemy.spritesheet, enemy.x, enemy.y, 0, scaleFactor, scaleFactor)
+                if enemy.animation then
+                    enemy.animation:draw(Enemy.spritesheet, enemy.x, drawY, 0, scaleFactor, scaleFactor)
+                end
             end
 
             Enemy.drawHealthBar(enemy)
         end
     end
-
-    push:apply("end")  -- Finalizar la escala con push
+    push:apply("end")
 end
+
+
 
 
 
