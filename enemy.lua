@@ -102,10 +102,10 @@ end
 
 
 function Enemy.drawHealthBar(enemy)
-    local x = enemy.x
-    local y = enemy.y + 100
-    local width = Enemy.anchura_enemigo
-    local height = 5
+    local x = (enemy.x +30 ) --que tan de lado se dibuja (x)
+    local y = enemy.y + 130 --que tanalto se dibuja
+    local width = 50 --que tan gorda de ancho es la vida
+    local height = 2 --que tan gorda (en altura) es la vida
 
     love.graphics.setColor(1, 0, 0)
     love.graphics.rectangle("fill", x, y, width, height)

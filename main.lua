@@ -86,11 +86,11 @@ function love.draw()
     elseif currentState == "gameover" then
         -- Pantalla de Game Over
         love.graphics.setColor(0, 0, 0)
-        love.graphics.rectangle("fill", 0, 0, VIRTUAL_WIDTH, VIRTUAL_HEIGHT)
+        love.graphics.rectangle("fill", 0, 0, love.graphics.getWidth(), love.graphics.getHeight())
         love.graphics.setColor(1, 0, 0)
-        love.graphics.printf("GAME OVER", 0, VIRTUAL_HEIGHT / 2 - 40, VIRTUAL_WIDTH, "center")
+        love.graphics.printf("GAME OVER", 0, love.graphics.getHeight() / 2 - 40, love.graphics.getWidth(), "center")
         love.graphics.setColor(1, 1, 1)
-        love.graphics.printf("Presiona R para reiniciar", 0, VIRTUAL_HEIGHT / 2 + 20, VIRTUAL_WIDTH, "center")
+        love.graphics.printf("Presiona R para reiniciar", 0, love.graphics.getHeight() / 2 + 20, love.graphics.getWidth(), "center")
     end
 
 end

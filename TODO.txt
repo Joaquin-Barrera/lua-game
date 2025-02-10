@@ -50,7 +50,7 @@ En weapon no se muestra la bala, solo el flash  del arma y el sonido/chispas cua
 Ajustar la vida del tanque y el daño que realizan los enemigos al mismo 🔴
 Implementar una economía para el juego, poder usar ese dinero para comprar cosas 🔴
 Hacer que el juego se pueda poner en pantalla completa y, eventualmente, en modo ventana también 🔴
-
+Implementar una animacion distinta a la hora de caminar y la de correr (tomando en cuenta la velocidad del enemigo) 🔴
 
 
 Cosas a arreglar o cambiar:

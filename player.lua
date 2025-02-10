@@ -8,6 +8,10 @@ Player.y = 0  -- Ajusta la altura según el terreno
 Player.width = 50  -- Ancho del tanque
 Player.height = 50  -- Alto del tanque
 
+local baseWidth, baseHeight = 640, 360 -- Resolución base
+local scaleX = love.graphics.getWidth() / baseWidth
+local scaleY = love.graphics.getHeight() / baseHeight
+
 local screenWidth, screenHeight = love.graphics.getWidth(), love.graphics.getHeight() 
 
 
@@ -37,8 +41,8 @@ function Player.load()
     Player.font = love.graphics.newFont(18) -- Tamaño de la fuente
 
     -- Vida del jugador
-    Player.health = 1000
-    Player.maxHealth = 1000
+    Player.health = 100
+    Player.maxHealth = 100
 end
 
 function Player.update(dt, isPaused)
@@ -52,8 +56,8 @@ function Player.update(dt, isPaused)
 end
 
 function Player.drawHealthBar(x, y)
-    local width = 200  -- Ancho de la barra de vida
-    local height = 20  -- Alto de la barra de vida
+    local width = 150  -- Ancho de la barra de vida
+    local height = 10  -- Alto de la barra de vida
 
     -- Dibujar la vida faltante (fondo rojo)
     love.graphics.setColor(1, 0, 0)  -- Rojo
@@ -71,9 +75,9 @@ end
 
 function Player.draw(isPaused)
     -- Dibujar la barra de vida en la posición del jugador
-
-    Player.drawHealthBar((love.graphics.getWidth()-350), (love.graphics.getHeight()-250)) -- ESTO MODIFICA LA ALTURA DE LA BARRA DE VIDA
-
+    push:apply("start")
+    Player.drawHealthBar(425,240) -- Ajusta la posición relativa
+    push:apply("end")
     -- Dibujar el arma
     Weapons.draw(Player.currentWeapon, Player.arma_X, Player.arma_Y)
 
