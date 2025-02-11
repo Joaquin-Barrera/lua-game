@@ -72,7 +72,7 @@ function Enemy.load()
     Enemy.shootingAnimationTemplate = {
         shooting = anim8.newAnimation(Enemy.shootingGrid('1-1', 1), 0.1)
     }
-    Enemy.shooting2AnimationTemplate = anim8.newAnimation(Enemy.shooting2Grid('1-5', 1), 0.1, 'pauseAtEnd') -- Frame 1 al 4
+    Enemy.shooting2AnimationTemplate = anim8.newAnimation(Enemy.shooting2Grid('1-5', 1), 0.01, 'pauseAtEnd') -- Frame 1 al 4
 end
 
 
@@ -234,7 +234,7 @@ function Enemy.checkClick(x, y, weapon)
 
     for i = #Enemy.enemies, 1, -1 do
         local enemy = Enemy.enemies[i]
-        if not enemy.dead and worldX >= enemy.x and worldX <= enemy.x + Enemy.anchura_enemigo and worldY >= enemy.y and worldY <= enemy.y + Enemy.altura_enemigo then
+        if not enemy.dead and worldX >= (enemy.x +47 ) and worldX <= (enemy.x -55) + Enemy.anchura_enemigo and worldY >= (enemy.y+65) and worldY <= enemy.y + Enemy.altura_enemigo then
             enemy.health = enemy.health - 1
 
             if enemy.health <= 0 then

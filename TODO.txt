@@ -28,6 +28,10 @@ Barra de vida tanto para el jugador (objeto a defender) como para los enemigos �
 Pantalla de game over 🟡
 Añadir la logica de daño de los enemigos 🟢
 Sonido de disparo del enemigo 🟢
+Animación de disparo del enemigo 🟢
+Animación de apuntado del enemigo 🟢
+
+
 
 Cosas a implementar:
 Menu de compra entre rondas 🔴
@@ -36,9 +40,7 @@ Nuevas armas (pensar cuales pueden ser, tomar nota, sacar inspiracion de enter t
 Nuevos enemigos (buscar inspiración en otros roguelikes y en weapondearmorgames)🔴
 Animaciones mas suaves para todo 🔴
 Pantalla de ronda ganada 🔴
-Animación de apuntado del enemigo 🔴
 Animación de recarga del enemigo 🔴
-Animación de disparo del enemigo 🔴
 Sonido de recarga del enemigo 🔴
 Configurar que cada arma tenga un daño diferente 🔴
 Implementar el uso de 2 armas como máximo que se puedan cambiar en cada ronda 🔴
@@ -50,12 +52,17 @@ En weapon no se muestra la bala, solo el flash  del arma y el sonido/chispas cua
 Ajustar la vida del tanque y el daño que realizan los enemigos al mismo 🔴
 Implementar una economía para el juego, poder usar ese dinero para comprar cosas 🔴
 Hacer que el juego se pueda poner en pantalla completa y, eventualmente, en modo ventana también 🔴
+
+
 Implementar una animacion distinta a la hora de caminar y la de correr (tomando en cuenta la velocidad del enemigo) 🔴
+Hacer que el headshot sea instakill 🔴
+Hacer que el enemigo desaparezca parpadeando (Corte metal slug) 🔴
+Darle sombra al enemigo 🔴
 
 
 Cosas a arreglar o cambiar:
 
-Mejorar las hitboxes una vez que estén bien definidos los sprites de los enemigos 🟡
+Mejorar las hitboxes una vez que estén bien definidos los sprites de los enemigos 🟢 (creo que van a quedar los sprites actuales de los enemigos, al menos por ahora)
 Ajustar la vida del tanque y el daño que realizan los enemigos al mismo 🟡
 Tomar como base todos sprites y cosas que se vean bien en 1080 o superior y despues reducirlos a una resolución menor 🟡
 Pueden ser percs tambien (idea de genaro d'lufi) 🟡
