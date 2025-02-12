@@ -96,10 +96,11 @@ function Enemy.spawn()
         shootTimer = 0,
         health = 3,
         maxHealth = 3,
-        deathStartTime = nil  -- Variable para el tiempo de inicio de la animación de muerte
+        deathStartTime = nil,  -- Variable para el tiempo de inicio de la animación de muerte
+        blinkTimer = 2,       -- Duración del parpadeo en segundos
+        isBlinking = false     -- Estado de parpadeo
     })
 end
-
 
 function Enemy.drawHealthBar(enemy)
     local x = (enemy.x +30 ) --que tan de lado se dibuja (x)
@@ -125,15 +126,20 @@ function Enemy.update(dt)
             if enemy.dead then
                 if enemy.deathAnimation then
                     enemy.deathAnimation:update(dt)
-                    
-                    -- Si ha comenzado la animación de muerte, contamos el tiempo para eliminar al enemigo
+
+                    -- Si ha comenzado la animación de muerte, contamos el tiempo para el parpadeo
                     if enemy.deathStartTime == nil then
                         enemy.deathStartTime = love.timer.getTime()
+                        enemy.isBlinking = true  -- Activar el parpadeo
                     end
 
-                    -- Verificamos si el tiempo de desaparición ha pasado
-                    if love.timer.getTime() - enemy.deathStartTime >= deadTime then
-                        table.remove(Enemy.enemies, i)  -- Eliminar al enemigo
+                    -- Si el enemigo está en estado de parpadeo
+                    if enemy.isBlinking then
+                        enemy.blinkTimer = enemy.blinkTimer - dt
+                        if enemy.blinkTimer <= 0 then
+                            enemy.isBlinking = false
+                            table.remove(Enemy.enemies, i)  -- Eliminar al enemigo después del parpadeo
+                        end
                     end
                 end
             else
@@ -171,7 +177,6 @@ function Enemy.update(dt)
     end        
 end
 
-
 function Enemy.shoot(enemy)
     playEnemyShotSound()
     Player.health = Player.health - 10
@@ -188,18 +193,18 @@ function Enemy.draw()
     local scaleFactor = math.min(scaleX / baseWidth, scaleY / baseHeight) -- Escalar proporcionalmente
 
     for _, enemy in ipairs(Enemy.enemies) do
-        if enemy.dead and enemy.deathAnimation then
-            local scale = scaleFactor
-            local offsetX = Enemy.anchura_enemigo * ((1 - scale) + 0.3)
-            local offsetY = Enemy.altura_enemigo * (1 - scale - 0.1)
+        if not enemy.dead then
+            -- Dibujar la sombra antes del enemigo
+            local shadowX = enemy.x + (Enemy.anchura_enemigo / 2) - 25  -- Mover la sombra más a la izquierda
+            local shadowY = enemy.y + Enemy.altura_enemigo   -- Ajustar la sombra más cerca de los pies
+            local shadowWidth = Enemy.anchura_enemigo * 0.5  -- Hacer la sombra más estrecha
+            local shadowHeight = 6  -- Reducir la altura de la sombra
 
-            enemy.deathAnimation:draw(
-                Enemy.deathSpritesheet,
-                enemy.x + offsetX, enemy.y + offsetY,
-                0,
-                scale, scale
-            )
-        else
+            love.graphics.setColor(0, 0, 0, 0.5)  -- Color negro con transparencia
+            love.graphics.ellipse("fill", shadowX, shadowY, shadowWidth / 2, shadowHeight)  
+            love.graphics.setColor(1, 1, 1)  -- Restaurar color
+
+            -- Dibujar el enemigo
             local drawY = enemy.y * (scaleY / baseHeight) -- Ajustar la altura
 
             if enemy.state == Enemy.STATE_SHOOTING then
@@ -215,10 +220,40 @@ function Enemy.draw()
             end
 
             Enemy.drawHealthBar(enemy)
+        elseif enemy.dead and enemy.deathAnimation then
+            -- Parpadeo: alternar la visibilidad del sprite
+            if enemy.isBlinking then
+                if math.floor(enemy.blinkTimer * 20) % 2 == 0 then
+                    local scale = scaleFactor
+                    local offsetX = Enemy.anchura_enemigo * (1 - scale )
+                    local offsetY = Enemy.altura_enemigo * (1 - scale)
+
+                    enemy.deathAnimation:draw(
+                        Enemy.deathSpritesheet,
+                        enemy.x + offsetX, enemy.y + offsetY,
+                        0,
+                        scale, scale
+                    )
+                end
+            else
+                -- Dibujar el sprite normalmente si no está parpadeando
+                local scale = scaleFactor
+                local offsetX = Enemy.anchura_enemigo * ((1 - scale) + 0.3)
+                local offsetY = Enemy.altura_enemigo * (1 - scale - 0.1)
+
+                enemy.deathAnimation:draw(
+                    Enemy.deathSpritesheet,
+                    enemy.x + offsetX, enemy.y + offsetY,
+                    0,
+                    scale, scale
+                )
+            end
         end
     end
     push:apply("end")
 end
+
+
 
 
 function Enemy.checkClick(x, y, weapon)
@@ -234,17 +269,36 @@ function Enemy.checkClick(x, y, weapon)
 
     for i = #Enemy.enemies, 1, -1 do
         local enemy = Enemy.enemies[i]
-        if not enemy.dead and worldX >= (enemy.x +47 ) and worldX <= (enemy.x -55) + Enemy.anchura_enemigo and worldY >= (enemy.y+65) and worldY <= enemy.y + Enemy.altura_enemigo then
-            enemy.health = enemy.health - 1
 
-            if enemy.health <= 0 then
-                enemy.dead = true
-                enemy.deathAnimation = Enemy.deathAnimationTemplate:clone()
+        if not enemy.dead then
+            local enemyLeft = enemy.x + 47
+            local enemyRight = (enemy.x - 55) + Enemy.anchura_enemigo
+            local enemyTop = enemy.y + 65
+            local enemyBottom = enemy.y + Enemy.altura_enemigo
+
+            -- Definir la hitbox de la cabeza (por ejemplo, el 20% superior del enemigo)
+            local headTop = enemyTop
+            local headBottom = enemyTop + (Enemy.altura_enemigo * 0.095)
+
+            if worldX >= enemyLeft and worldX <= enemyRight then
+                if worldY >= headTop and worldY <= headBottom then
+                    -- Headshot: quita 2 de vida en vez de 1
+                    enemy.health = enemy.health - 2
+                elseif worldY >= enemyTop and worldY <= enemyBottom then
+                    -- Disparo normal: reducir vida
+                    enemy.health = enemy.health - 1
+                end
+
+                if enemy.health <= 0 then
+                    enemy.dead = true
+                    enemy.deathAnimation = Enemy.deathAnimationTemplate:clone()
+                end
+
+                return true
             end
-
-            return true
         end
     end
+
     return false
 end
 
