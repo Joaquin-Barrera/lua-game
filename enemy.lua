@@ -2,6 +2,7 @@ local push = require "libraries/push"
 anim8 = require "libraries/anim8"
 local Player = require("player")
 local Sounds = require("sounds")
+local Shop = require ("shop")
 
 Enemy = {}
 Enemy.projectiles = {} -- Lista de proyectiles enemigos
@@ -294,7 +295,9 @@ function Enemy.checkClick(x, y, weapon)
                 if enemy.health <= 0 then
                     enemy.dead = true
                     enemy.deathAnimation = Enemy.deathAnimationTemplate:clone()
-                end
+                    local reward = enemy.reward or 1
+                    Shop.addMoney(reward)  -- ← Cambié shop a Shop
+                end                
 
                 return true
             end

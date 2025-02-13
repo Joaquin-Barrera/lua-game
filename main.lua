@@ -4,6 +4,7 @@ local Game = require("game")
 local Sounds = require("sounds")
 local Menu = require("menu")
 push = require("libraries/push") -- Ahora en minúsculas para consistencia
+local shop = require("shop")
 
 WINDOW_WIDTH, WINDOW_HEIGHT = love.window.getDesktopDimensions()
 WINDOW_WIDTH, WINDOW_HEIGHT = WINDOW_WIDTH * 0.8, WINDOW_HEIGHT * 0.8
@@ -46,6 +47,7 @@ function love.update(dt)
         Menu.update(dt)
     elseif currentState == "play" then
         if not gamePaused then
+            shop.update(dt)
             love.mouse.setVisible(false)
             Player.update(dt, gamePaused, screenWidth, screenHeight)
             Enemy.update(dt)
@@ -72,6 +74,28 @@ function love.draw()
         Game.draw()
         Enemy.draw()
         Player.draw(gamePaused)
+        love.graphics.setColor(1, 1, 0) -- Amarillo
+
+        local x = love.graphics.getWidth() - 100
+        local y = love.graphics.getHeight() - 200
+
+        -- Dibujar "$$$ : " estático (sin efecto de baile)
+        love.graphics.print("$$$ : ", x, y)
+
+        -- Medir el ancho del texto fijo para posicionar correctamente el dinero
+        local textWidth = love.graphics.getFont():getWidth("$$$ : ")
+
+        -- Dibujar solo la cantidad con el efecto de escala y rotación
+        love.graphics.print(
+            shop.getMoney(),
+            x + textWidth, y,  -- Posición
+            shop.moneyRotation,  -- Rotación
+            shop.moneyScale, shop.moneyScale  -- Escala
+        )
+
+        love.graphics.setColor(1, 1, 1) -- Restaurar a blanco
+
+
 
         -- Mostrar pantalla de pausa
         if gamePaused then
