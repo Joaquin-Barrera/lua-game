@@ -25,7 +25,7 @@ function love.load()
         resizable = true
     })
 
-    love.mouse.setVisible(false)
+    love.mouse.setVisible(true)
 
     -- Inicializar módulos
     Player.load()
@@ -46,6 +46,7 @@ function love.update(dt)
         Menu.update(dt)
     elseif currentState == "play" then
         if not gamePaused then
+            love.mouse.setVisible(false)
             Player.update(dt, gamePaused, screenWidth, screenHeight)
             Enemy.update(dt)
             Game.update(dt)

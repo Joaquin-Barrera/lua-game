@@ -10,11 +10,12 @@ function Weapons.load()
             shootDuration = 0.1,
             isShooting = false,
             shootTimer = 0,
-            ammo = 12, --municion inicial                               --DEBEN CAMBIARSE 
-            magazineSize = 12, --tamaño del cargador                    --AL MISMO TIEMPO
-            reloadTime = 1.2, -- Tiempo de recarga en segundos
+            ammo = 12,
+            magazineSize = 12,
+            reloadTime = 1.2,
             isReloading = false,
-            reloadTimer = 0
+            reloadTimer = 0,
+            weaponDamage = {normal = {20, 40}, headshot = {30, 50}} -- Rango de daño
         },
         shotgun = {
             normal = love.graphics.newImage("sprites/shotgun1.png"),
@@ -28,10 +29,10 @@ function Weapons.load()
             magazineSize = 6,
             reloadTime = 2.0,
             isReloading = false,
-            reloadTimer = 0
+            reloadTimer = 0,
+            weaponDamage = {normal = {40, 60}, headshot = {60, 90}} -- Mayor daño que la pistola
         }
-    }-- para añadir más armas, copiar la lógica de las armas anteriores y pegarla aqui, cambiando el nombre y los sprites
-     --IMPORTANTE: Tambien modificar main.lua para incluir el cambio de arma
+    }
 
     -- Inicializar dimensiones de las armas
     for _, weapon in pairs(Weapons.list) do
@@ -39,6 +40,7 @@ function Weapons.load()
         weapon.height = weapon.normal:getHeight()
     end
 end
+
 
 function Weapons.update(dt, weapon)
     if weapon.isReloading then

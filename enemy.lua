@@ -94,8 +94,8 @@ function Enemy.spawn()
         deathAnimation = nil,
         shootCooldown = love.math.random(2, 4),
         shootTimer = 0,
-        health = 3,
-        maxHealth = 3,
+        health = 100, --vida del enemigo, cambiar junto con maxhealth
+        maxHealth = 100,
         deathStartTime = nil,  -- Variable para el tiempo de inicio de la animación de muerte
         blinkTimer = 2,       -- Duración del parpadeo en segundos
         isBlinking = false     -- Estado de parpadeo
@@ -179,7 +179,7 @@ end
 
 function Enemy.shoot(enemy)
     playEnemyShotSound()
-    Player.health = Player.health - 10
+    Player.health = Player.health - love.math.random(20,50) --modifica la cantidad de daño que le hace al jugador
 
     -- Clonar la animación de disparo 2
     enemy.shooting2Animation = Enemy.shooting2AnimationTemplate:clone()
@@ -280,13 +280,15 @@ function Enemy.checkClick(x, y, weapon)
             local headTop = enemyTop
             local headBottom = enemyTop + (Enemy.altura_enemigo * 0.095)
 
-            if worldX >= enemyLeft and worldX <= enemyRight then
+            if worldX >= enemyLeft and worldX <= enemyRight then 
                 if worldY >= headTop and worldY <= headBottom then
-                    -- Headshot: quita 2 de vida en vez de 1
-                    enemy.health = enemy.health - 2
+                    -- Headshot: inflige daño en la cabeza
+                    local damage = love.math.random(weapon.weaponDamage.headshot[1], weapon.weaponDamage.headshot[2]) --modificar esto 
+                    enemy.health = enemy.health - damage
                 elseif worldY >= enemyTop and worldY <= enemyBottom then
-                    -- Disparo normal: reducir vida
-                    enemy.health = enemy.health - 1
+                    -- Disparo normal: inflige daño normal
+                    local damage = love.math.random(weapon.weaponDamage.normal[1], weapon.weaponDamage.normal[2]) --y esto, cuando añadamos nuevas armas
+                    enemy.health = enemy.health - damage
                 end
 
                 if enemy.health <= 0 then

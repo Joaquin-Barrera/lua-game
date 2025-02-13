@@ -41,8 +41,8 @@ function Player.load()
     Player.font = love.graphics.newFont(18) -- Tamaño de la fuente
 
     -- Vida del jugador
-    Player.health = 100
-    Player.maxHealth = 100
+    Player.health = 1000
+    Player.maxHealth = 1000
 end
 
 function Player.update(dt, isPaused)
