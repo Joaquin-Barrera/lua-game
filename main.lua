@@ -93,7 +93,28 @@ function love.draw()
         love.graphics.setColor(1, 1, 1)
         love.graphics.printf("Presiona R para reiniciar", 0, love.graphics.getHeight() / 2 + 20, love.graphics.getWidth(), "center")
     end
+end
 
+function love.mousepressed(x, y, button)
+    if button == 1 then
+        if currentState == "menu" then
+            local nextState = Menu.mousepressed(x, y, button)
+            if nextState == "play" then
+                currentState = "play"
+                Enemy.spawn()
+            elseif nextState == "options" then
+                print("Opciones seleccionadas (no implementado)")
+            elseif nextState == "quit" then
+                love.event.quit()
+            end
+        elseif currentState == "play" then
+            if not gamePaused then
+                local weapon = Player.getCurrentWeapon()
+                Player.shoot()
+                Enemy.checkClick(x, y, weapon)
+            end
+        end
+    end
 end
 
 function love.keypressed(key)
@@ -109,43 +130,16 @@ function love.keypressed(key)
         end
     end
 
-    if currentState == "menu" then
-        local nextState = Menu.keypressed(key)
-        if nextState == "play" then
-            currentState = "play"
-            Enemy.spawn()
-        elseif nextState == "options" then
-            print("Opciones seleccionadas (no implementado)")
-        elseif nextState == "quit" then
-            love.event.quit()
-        end
-    elseif currentState == "play" then
-        if key == "p" then
-            gamePaused = not gamePaused
-        end
-    elseif currentState == "gameover" then
-        if key == "r" then
-            resetGame()
-        end
-    end
-
-    -- Alternar entre pantalla completa y ventana
-    if key == "f" then
+    if key == "p" and currentState == "play" then
+        gamePaused = not gamePaused
+    elseif key == "r" and currentState == "gameover" then
+        resetGame()
+    elseif key == "f" then
         fullscreen = not fullscreen
         push:setupScreen(VIRTUAL_WIDTH, VIRTUAL_HEIGHT, WINDOW_WIDTH, WINDOW_HEIGHT, {
             fullscreen = fullscreen,
             resizable = true,
             vsync = true
         })
-    end
-end
-
-function love.mousepressed(x, y, button)
-    if currentState == "play" and button == 1 then
-        if not gamePaused then
-            local weapon = Player.getCurrentWeapon()
-            Player.shoot()
-            Enemy.checkClick(x, y, weapon)
-        end
     end
 end

@@ -1,72 +1,78 @@
 local Menu = {}
 
-Menu.options = {"Jugar", "Opciones", "Salir"}
-Menu.selected = 1
-
+Menu.options = {
+    {text = "Jugar", action = "play"},
+    {text = "Opciones", action = "options"},
+    {text = "Salir", action = "quit"}
+}
+Menu.selected = nil
 
 function Menu.load()
-    Menu.font = love.graphics.newFont(58)
+    Menu.font = love.graphics.newFont(36)
     Menu.font:setFilter("nearest", "nearest")
+    Menu.background = love.graphics.newImage("sprites/menubackground.png")
 end
 
 function Menu.update(dt)
-    -- Aquí puedes agregar lógica de actualización si es necesario
+    local mouseX, mouseY = love.mouse.getPosition()
+    local screenWidth, screenHeight = love.graphics.getWidth(), love.graphics.getHeight()
+    local buttonWidth, buttonHeight = 300, 80
+    local spacing = 20
+    local totalHeight = #Menu.options * (buttonHeight + spacing) - spacing
+    local startY = (screenHeight - totalHeight) / 2
+
+    Menu.selected = nil
+    for i, option in ipairs(Menu.options) do
+        local x = (screenWidth - buttonWidth) / 2
+        local y = startY + (i - 1) * (buttonHeight + spacing)
+        
+        if mouseX >= x and mouseX <= x + buttonWidth and mouseY >= y and mouseY <= y + buttonHeight then
+            Menu.selected = i
+        end
+    end
 end
 
 function Menu.draw()
+    love.graphics.draw(Menu.background, 0, 0, 0, love.graphics.getWidth() / Menu.background:getWidth(), love.graphics.getHeight() / Menu.background:getHeight())
     love.graphics.setFont(Menu.font)
-
-    -- Obtener la resolución virtual (no la de la ventana física)
-    local screenWidth, screenHeight =love.graphics.getWidth(), love.graphics.getHeight()
-
-    -- Obtener la altura de la fuente
-    local fontHeight = Menu.font:getHeight()
-
-    -- Definir el espaciado entre opciones (por ejemplo, 1.5 veces la altura de la fuente)
-    local spacing = fontHeight * 1.5
-
-    -- Calcular la altura total del menú
-    local totalHeight = #Menu.options * spacing
-
-    -- Posición inicial para centrar el menú verticalmente
+    
+    local screenWidth, screenHeight = love.graphics.getWidth(), love.graphics.getHeight()
+    local buttonWidth, buttonHeight = 300, 80
+    local spacing = 20
+    local totalHeight = #Menu.options * (buttonHeight + spacing) - spacing
     local startY = (screenHeight - totalHeight) / 2
-
+    
     for i, option in ipairs(Menu.options) do
-        local textWidth = Menu.font:getWidth(option)
-        local x = (screenWidth - textWidth) / 2 -- Centra horizontalmente
-        local y = startY + (i - 1) * spacing -- Posición vertical de cada opción
-
-        if i == Menu.selected then
-            love.graphics.setColor(1, 0, 0) -- Color rojo para la opción seleccionada
+        local x = (screenWidth - buttonWidth) / 2
+        local y = startY + (i - 1) * (buttonHeight + spacing)
+        
+        if Menu.selected == i then
+            love.graphics.setColor(1, 0, 0) -- Color rojo para el botón seleccionado
         else
-            love.graphics.setColor(1, 1, 1) -- Color blanco para las demás opciones
+            love.graphics.setColor(0.5, 0.5, 0.5) -- Color gris para los demás botones
         end
-
-        love.graphics.print(option, x, y)
+        
+        love.graphics.rectangle("fill", x, y, buttonWidth, buttonHeight, 10)
+        
+        love.graphics.setColor(1, 1, 1) -- Color blanco para el texto
+        local textWidth = Menu.font:getWidth(option.text)
+        local textHeight = Menu.font:getHeight()
+        love.graphics.print(option.text, x + (buttonWidth - textWidth) / 2, y + (buttonHeight - textHeight) / 2)
     end
 end
 
-
-function Menu.keypressed(key)
-    if key == "up" then
-        Menu.selected = Menu.selected - 1
-        if Menu.selected < 1 then
-            Menu.selected = #Menu.options
-        end
-    elseif key == "down" then
-        Menu.selected = Menu.selected + 1
-        if Menu.selected > #Menu.options then
-            Menu.selected = 1
-        end
-    elseif key == "return" then
-        if Menu.selected == 1 then
+function Menu.mousepressed(x, y, button)
+    if button == 1 and Menu.selected then
+        local action = Menu.options[Menu.selected].action
+        if action == "play" then
             return "play"
-        elseif Menu.selected == 2 then
+        elseif action == "options" then
             return "options"
-        elseif Menu.selected == 3 then
+        elseif action == "quit" then
             love.event.quit()
         end
     end
+    return nil
 end
 
 return Menu

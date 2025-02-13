@@ -3,6 +3,10 @@
 🔴 = Aún no fue Implementado
 
 
+IMPORTANTE: PARA CREAR UN ARMA NUEVA TENGO QUE MODIFICAR TANTO WEAPONS. LUA (CARGANDO EL SPRITE, CREANDO EL DAÑO, ETC) Y TAMBIEN ENEMY.LUA, PARA
+CARGAR EL DAÑO QUE HACE CADA ARMA
+
+
 Cosas que están implementadas:
 
 Fondo (cambiar mas adelante) 🟡
@@ -67,7 +71,3 @@ Mejorar las hitboxes una vez que estén bien definidos los sprites de los enemig
 Ajustar la vida del tanque y el daño que realizan los enemigos al mismo 🟡
 Tomar como base todos sprites y cosas que se vean bien en 1080 o superior y despues reducirlos a una resolución menor 🟡
 Pueden ser percs tambien (idea de genaro d'lufi) 🟡
-
-
-IMPORTANTE: PARA CREAR UN ARMA NUEVA TENGO QUE MODIFICAR TANTO WEAPONS. LUA (CARGANDO EL SPRITE, CREANDO EL DAÑO, ETC) Y TAMBIEN ENEMY.LUA, PARA
-CARGAR EL DAÑO QUE HACE CADA ARMA
