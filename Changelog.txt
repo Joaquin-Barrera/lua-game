@@ -1,0 +1,19 @@
+28/01/2025
+
+-- Empecé a desarrollar mi juego en LOVE2D.
+
+30/21/2025 
+
+-- Agregué la lógica para añadir más armas
+-- Agregué la pantalla de pausa
+-- Cambié la distancia mínima y máxima a la que se generan enemigos
+-- Implementé animaciones para los enemigos cuando caminan, disparan y mueren
+
+31/01/2025
+
+-- Modifiqué la mira para que solo se dibuje si el juego no está pausado
+-- Implementé un sistema de balas y de recarga (automático cuando se queda sin balas, manual con la R)
+-- Añadí una barra de vida tanto para los enemigos como para el jugador
+-- Implementé el objeto a defender (por el momento es un tanque)
+
+NO AFECTAR LOS TEXTOS CON PUSH  PORQUE SE VEN BORROSOS SI LO HAGO!!!!!!!!!!!
