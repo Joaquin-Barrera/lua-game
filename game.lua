@@ -1,5 +1,9 @@
 local Game = {}
 push = require("libraries/push")
+Game.waveCount = 0
+Game.wavesPerRound = 3 -- Puedes cambiar esto a 3, 4 o el valor que prefieras (CANTIDAD DE OLEADAS POR RONDA)
+
+
 
 Game.round = 1
 DefendThis = love.graphics.newImage("sprites/tank.png")
@@ -22,12 +26,24 @@ updateFont()
 
 function Game.update(dt)
     if #Enemy.enemies == 0 then
-        Game.round = Game.round + 1
-        for i = 1, Game.round do
+        Game.waveCount = Game.waveCount + 1 -- Aumenta el contador de oleadas
+        
+        if Game.waveCount >= Game.wavesPerRound then
+            Game.round = Game.round + 1
+            Game.waveCount = 0 -- Reinicia el contador de oleadas
+        end
+
+        -- Determinar cuántos enemigos se spawnearán en esta oleada
+        local minEnemies = 1 + Game.round  -- Valor mínimo de enemigos, puedes ajustarlo
+        local maxEnemies = 3 + Game.round  -- Valor máximo de enemigos, puedes ajustarlo
+        local numEnemies = love.math.random(minEnemies, maxEnemies)
+
+        for i = 1, numEnemies do
             Enemy.spawn()
         end
     end
 end
+
 
 function Game.resize(w, h)
     push:resize(w, h)  -- Ajustar push a la nueva resolución

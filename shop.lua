@@ -9,6 +9,13 @@ shop.rotationSpeed = 1  -- Velocidad de la rotación (en radianes por segundo)
 shop.rotationRange = 0.1  -- Rango máximo de rotación (en radianes)
 shop.danceTimer = 0  -- Temporizador para el baile (0 significa que no está bailando)
 
+shop.active = false -- Indica si la tienda está activa
+shop.items = {
+    {name = "Mejorar arma", cost = 100},
+    {name = "Recuperar vida", cost = 50}
+}
+shop.selectedItem = 1
+
 function shop.addMoney(amount)
     shop.money = shop.money + amount
     shop.moneyScale = 1.2  -- Aumenta el tamaño del texto temporalmente
@@ -21,25 +28,19 @@ function shop.getMoney()
 end
 
 function shop.update(dt)
-    -- Actualizar la escala del texto
     if shop.moneyScale > 1 then
         shop.scaleTimer = shop.scaleTimer - dt
         if shop.scaleTimer <= 0 then
             shop.moneyScale = shop.moneyScale - dt * 2  -- Reducir gradualmente la escala
             if shop.moneyScale < 1 then
-                shop.moneyScale = 1  -- Asegurar que no se haga más pequeño de lo normal
+                shop.moneyScale = 1
             end
         end
     end
 
-    -- Actualizar el baile solo si el temporizador es mayor que 0
     if shop.danceTimer > 0 then
         shop.danceTimer = shop.danceTimer - dt
-
-        -- Actualizar la rotación del texto
         shop.moneyRotation = shop.moneyRotation + shop.rotationDirection * shop.rotationSpeed * dt
-
-        -- Cambiar la dirección de la rotación si se alcanza el rango máximo
         if shop.moneyRotation > shop.rotationRange then
             shop.moneyRotation = shop.rotationRange
             shop.rotationDirection = -1
@@ -48,8 +49,44 @@ function shop.update(dt)
             shop.rotationDirection = 1
         end
     else
-        -- Desactivar el baile cuando el temporizador llegue a 0
         shop.moneyRotation = 0
+    end
+end
+
+function shop.draw()
+    if shop.active then
+        love.graphics.setColor(0, 0, 0, 0.7)
+        love.graphics.rectangle("fill", 100, 50, 400, 300)
+        love.graphics.setColor(1, 1, 1)
+        love.graphics.print("Tienda", 250, 70)
+        for i, item in ipairs(shop.items) do
+            local text = item.name .. " - " .. item.cost .. "$"
+            if i == shop.selectedItem then
+                text = "> " .. text .. " <"
+            end
+            love.graphics.print(text, 150, 120 + (i - 1) * 30)
+        end
+        love.graphics.print("Presiona 'Enter' para continuar", 150, 250)
+    end
+end
+
+function shop.keypressed(key)
+    if shop.active then
+        if key == "up" then
+            shop.selectedItem = math.max(1, shop.selectedItem - 1)
+        elseif key == "down" then
+            shop.selectedItem = math.min(#shop.items, shop.selectedItem + 1)
+        elseif key == "return" then
+            local item = shop.items[shop.selectedItem]
+            if shop.money >= item.cost then
+                shop.money = shop.money - item.cost
+                print("Compraste: " .. item.name) -- Aquí podrías agregar efectos reales
+            else
+                print("No tienes suficiente dinero")
+            end
+        elseif key == "escape" then
+            shop.active = false
+        end
     end
 end
 
