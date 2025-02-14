@@ -28,6 +28,11 @@ function shop.getMoney()
 end
 
 function shop.update(dt)
+    if shop.active then
+        -- Pausar el juego cuando la tienda está activa
+        return
+    end
+
     if shop.moneyScale > 1 then
         shop.scaleTimer = shop.scaleTimer - dt
         if shop.scaleTimer <= 0 then
@@ -55,10 +60,15 @@ end
 
 function shop.draw()
     if shop.active then
+        -- Dibujar un fondo semitransparente para la tienda
         love.graphics.setColor(0, 0, 0, 0.7)
         love.graphics.rectangle("fill", 100, 50, 400, 300)
+        
+        -- Dibujar el título de la tienda
         love.graphics.setColor(1, 1, 1)
         love.graphics.print("Tienda", 250, 70)
+        
+        -- Dibujar los ítems de la tienda
         for i, item in ipairs(shop.items) do
             local text = item.name .. " - " .. item.cost .. "$"
             if i == shop.selectedItem then
@@ -66,7 +76,10 @@ function shop.draw()
             end
             love.graphics.print(text, 150, 120 + (i - 1) * 30)
         end
-        love.graphics.print("Presiona 'Enter' para continuar", 150, 250)
+        
+        -- Dibujar instrucciones
+        love.graphics.print("Presiona 'Enter' para comprar", 150, 250)
+        love.graphics.print("Presiona 'Escape' para salir", 150, 270)
     end
 end
 

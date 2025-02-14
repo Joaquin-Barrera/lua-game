@@ -1,5 +1,6 @@
 local Game = {}
 push = require("libraries/push")
+shop = require("shop")
 Game.waveCount = 0
 Game.wavesPerRound = 3 -- Puedes cambiar esto a 3, 4 o el valor que prefieras (CANTIDAD DE OLEADAS POR RONDA)
 
@@ -31,6 +32,9 @@ function Game.update(dt)
         if Game.waveCount >= Game.wavesPerRound then
             Game.round = Game.round + 1
             Game.waveCount = 0 -- Reinicia el contador de oleadas
+
+            -- Activar la tienda al completar una ronda
+            shop.active = true
         end
 
         -- Determinar cuántos enemigos se spawnearán en esta oleada

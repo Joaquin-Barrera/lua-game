@@ -3,17 +3,17 @@ local Enemy = require("enemy")
 local Game = require("game")
 local Sounds = require("sounds")
 local Menu = require("menu")
-push = require("libraries/push") -- Ahora en minúsculas para consistencia
-local shop = require("shop")
+push = require("libraries/push")
+local shop = require("shop") -- Importar la tienda
 
 WINDOW_WIDTH, WINDOW_HEIGHT = love.window.getDesktopDimensions()
 WINDOW_WIDTH, WINDOW_HEIGHT = WINDOW_WIDTH * 0.8, WINDOW_HEIGHT * 0.8
 
-VIRTUAL_WIDTH, VIRTUAL_HEIGHT = 640 , 360
+VIRTUAL_WIDTH, VIRTUAL_HEIGHT = 640, 360
 
 local currentState = "menu"
 local gamePaused = false
-local fullscreen = false -- Ahora empieza en ventana
+local fullscreen = false
 local screenWidth, screenHeight = VIRTUAL_WIDTH, VIRTUAL_HEIGHT
 
 function love.load()
@@ -47,11 +47,15 @@ function love.update(dt)
         Menu.update(dt)
     elseif currentState == "play" then
         if not gamePaused then
+            -- Solo actualizar el juego si la tienda no está activa
+            if not shop.active then
+                Player.update(dt, gamePaused, screenWidth, screenHeight)
+                Enemy.update(dt)
+                Game.update(dt)
+            end
+
+            -- Actualizar la tienda
             shop.update(dt)
-            love.mouse.setVisible(false)
-            Player.update(dt, gamePaused, screenWidth, screenHeight)
-            Enemy.update(dt)
-            Game.update(dt)
 
             if Player.health <= 0 then
                 currentState = "gameover"
@@ -66,7 +70,7 @@ end
 
 function love.draw()
     Game.background = love.graphics.newImage("sprites/ciudadprueba2.png")
-   
+
     -- Dibujar la interfaz y los objetos del juego
     if currentState == "menu" then
         Menu.draw()
@@ -74,34 +78,31 @@ function love.draw()
         Game.draw()
         Enemy.draw()
         Player.draw(gamePaused)
-        love.graphics.setColor(1, 1, 0) -- Amarillo
 
+        -- Dibujar el dinero del jugador
+        love.graphics.setColor(1, 1, 0) -- Amarillo
         local x = love.graphics.getWidth() - 100
         local y = love.graphics.getHeight() - 200
-
-        -- Dibujar "$$$ : " estático (sin efecto de baile)
         love.graphics.print("$$$ : ", x, y)
-
-        -- Medir el ancho del texto fijo para posicionar correctamente el dinero
         local textWidth = love.graphics.getFont():getWidth("$$$ : ")
-
-        -- Dibujar solo la cantidad con el efecto de escala y rotación
         love.graphics.print(
             shop.getMoney(),
-            x + textWidth, y,  -- Posición
-            shop.moneyRotation,  -- Rotación
-            shop.moneyScale, shop.moneyScale  -- Escala
+            x + textWidth, y,
+            shop.moneyRotation,
+            shop.moneyScale, shop.moneyScale
         )
-
         love.graphics.setColor(1, 1, 1) -- Restaurar a blanco
 
-
+        -- Dibujar la tienda si está activa
+        if shop.active then
+            shop.draw()
+        end
 
         -- Mostrar pantalla de pausa
         if gamePaused then
             love.mouse.setVisible(true)
             love.graphics.setColor(0, 0, 0, 0.5)
-            love.graphics.rectangle("fill", 0, 0, love.graphics.getWidth(), love.graphics.getHeight()) 
+            love.graphics.rectangle("fill", 0, 0, love.graphics.getWidth(), love.graphics.getHeight())
             love.graphics.setColor(1, 1, 1)
             love.graphics.printf("PAUSA", 0, love.graphics.getHeight() / 2 - 20, love.graphics.getWidth(), "center")
             love.graphics.printf("Presiona P para reanudar", 0, love.graphics.getHeight() / 2 + 20, love.graphics.getWidth(), "center")
@@ -165,5 +166,10 @@ function love.keypressed(key)
             resizable = true,
             vsync = true
         })
+    end
+
+    -- Manejar la entrada de la tienda
+    if shop.active then
+        shop.keypressed(key)
     end
 end
