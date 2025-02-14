@@ -9,7 +9,7 @@ Game.wavesPerRound = 3 -- Puedes cambiar esto a 3, 4 o el valor que prefieras (C
 Game.round = 1
 DefendThis = love.graphics.newImage("sprites/tank.png")
 tankX = 400
-tankY = 230  --esto define la posicion en x e y del tanque (lo que hay que defender digamos)
+tankY = 230  --esto define la posicion en x e y del tanque (lo que hay que defender digamos)s
 
 -- Resolución nativa del juego
 Game.baseWidth = 640
