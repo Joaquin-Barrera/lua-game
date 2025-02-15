@@ -60,6 +60,7 @@ end
 
 function shop.draw()
     if shop.active then
+        love.mouse.setVisible(true) --dibujar el mouse
         -- Dibujar un fondo semitransparente para la tienda
         love.graphics.setColor(0, 0, 0, 0.7)
         love.graphics.rectangle("fill", 100, 50, 400, 300)

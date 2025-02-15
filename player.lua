@@ -81,8 +81,8 @@ function Player.draw(isPaused)
     -- Dibujar el arma
     Weapons.draw(Player.currentWeapon, Player.arma_X, Player.arma_Y)
 
-    -- Dibujar la mira si el juego no está pausado
-    if not isPaused then
+    -- Dibujar la mira si el juego no está pausado y si no esta en la tienda
+    if not isPaused and shop.active == false then
         local mouseX, mouseY = love.mouse.getPosition()
         local scaleFactor = 0.5
         local cursorWidth = cursorSprite:getWidth() * scaleFactor

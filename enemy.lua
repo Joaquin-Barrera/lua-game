@@ -82,7 +82,7 @@ function Enemy.spawn()
     local screenHeight = push:getHeight()  -- Altura escalada actual
 
     table.insert(Enemy.enemies, {
-        x = love.math.random(-50, -250),
+        x = love.math.random(-80, -250),
         y = screenHeight * (220 / baseHeight), -- Escalar en proporción a la altura
         speed = love.math.random(50, 200),
         stopX = love.math.random(1, 300),
