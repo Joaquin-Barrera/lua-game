@@ -262,6 +262,14 @@ function Enemy.checkClick(x, y, weapon)
         return false
     end
 
+    -- Obtener el tiempo actual
+    local currentTime = love.timer.getTime()
+
+    -- Si no ha pasado 1 segundo desde el último disparo, no hacer daño
+    if weapon.lastShotTime and (currentTime - weapon.lastShotTime < 0.20) then
+        return false
+    end
+
     -- Convertir coordenadas del mouse a la escala original
     local worldX, worldY = push:toGame(x, y)
     if not worldX or not worldY then
@@ -284,11 +292,11 @@ function Enemy.checkClick(x, y, weapon)
             if worldX >= enemyLeft and worldX <= enemyRight then 
                 if worldY >= headTop and worldY <= headBottom then
                     -- Headshot: inflige daño en la cabeza
-                    local damage = love.math.random(weapon.weaponDamage.headshot[1], weapon.weaponDamage.headshot[2]) --modificar esto 
+                    local damage = love.math.random(weapon.weaponDamage.headshot[1], weapon.weaponDamage.headshot[2])
                     enemy.health = enemy.health - damage
                 elseif worldY >= enemyTop and worldY <= enemyBottom then
                     -- Disparo normal: inflige daño normal
-                    local damage = love.math.random(weapon.weaponDamage.normal[1], weapon.weaponDamage.normal[2]) --y esto, cuando añadamos nuevas armas
+                    local damage = love.math.random(weapon.weaponDamage.normal[1], weapon.weaponDamage.normal[2])
                     enemy.health = enemy.health - damage
                 end
 
@@ -296,8 +304,11 @@ function Enemy.checkClick(x, y, weapon)
                     enemy.dead = true
                     enemy.deathAnimation = Enemy.deathAnimationTemplate:clone()
                     local reward = enemy.reward or 1
-                    Shop.addMoney(reward)  -- ← Cambié shop a Shop
+                    Shop.addMoney(reward)
                 end                
+
+                -- Guardar el tiempo del último disparo que hizo daño
+                weapon.lastShotTime = currentTime
 
                 return true
             end
