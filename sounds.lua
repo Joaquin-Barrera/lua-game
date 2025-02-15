@@ -31,18 +31,33 @@ for i = 1, poolSize do
 end
 
 -- Función para reproducir el sonido de disparo
+-- Variable global para rastrear el tiempo del último disparo con sonido
+lastShotSoundTime = 0  
+
+-- Función para reproducir el sonido de disparo
 function playShotSound()
+    local currentTime = love.timer.getTime()
+
+    -- Si no ha pasado 1 segundo desde el último disparo con sonido, no reproducir
+    if currentTime - lastShotSoundTime < 0.20 then
+        return
+    end
+
     local sound = shotSoundPool[currentShotIndex]
     if sound:isPlaying() then
         sound:stop() -- Reinicia si está en uso
     end
     sound:play()
-    
+
     currentShotIndex = currentShotIndex + 1
     if currentShotIndex > poolSize then
         currentShotIndex = 1 -- Regresar al inicio de la piscina
     end
+
+    -- Guardar el tiempo del último disparo con sonido
+    lastShotSoundTime = currentTime
 end
+
 
 -- Función para reproducir el sonido de casquillo
 function playshellSound()
