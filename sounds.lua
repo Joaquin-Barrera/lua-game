@@ -38,8 +38,8 @@ lastShotSoundTime = 0
 function playShotSound()
     local currentTime = love.timer.getTime()
 
-    -- Si no ha pasado 1 segundo desde el último disparo con sonido, no reproducir
-    if currentTime - lastShotSoundTime < 0.20 then
+    -- Si no ha pasado 0.19 segundos desde el último disparo con sonido, no reproducir 
+    if currentTime - lastShotSoundTime < 0.19 then
         return
     end
 

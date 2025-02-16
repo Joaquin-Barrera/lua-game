@@ -7,7 +7,6 @@ function Weapons.load()
             spritesheet = love.graphics.newImage("sprites/pistol.png"),
             width = 24320 / 19,  -- Ajustar al tamaño correcto del frame
             height = 720, 
-            shootDuration = 19 * 0.01, -- Ajustar duración al total de la animación
             isShooting = false,
             shootTimer = 0,
             ammo = 12,
@@ -26,7 +25,7 @@ function Weapons.load()
 
     pistol.animations = {
         idle = anim8.newAnimation(pistol.grid(1, 1), 0.1), -- Frame 1 = normal
-        shooting = anim8.newAnimation(pistol.grid("1-19", 1), 0.01)
+        shooting = anim8.newAnimation(pistol.grid("1-19", 1), 0.01) --Animación
     }
     
     pistol.currentAnimation = pistol.animations.idle
