@@ -49,7 +49,22 @@ function Weapons.update(dt, weapon)
     end
 end
 
+--MEJORAR PARA PANTALLA COMPLETA, QUIZAS NECESITO USAR PUSH, VERIFICAR
 function Weapons.draw(weapon, x, y)
+    local screenWidth = love.graphics.getWidth()
+    local screenHeight = love.graphics.getHeight()
+
+    -- Limitar X dentro de un rango permitido
+    if x > 50 then
+        x = 50
+    end
+
+    -- Limitar Y dentro de un rango permitido
+    if y > 50 then
+        y = 50
+    end
+
+    -- Dibujar el arma en la posición corregida
     weapon.currentAnimation:draw(weapon.spritesheet, x, y)
 end
 

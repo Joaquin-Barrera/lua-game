@@ -266,7 +266,7 @@ function Enemy.checkClick(x, y, weapon)
     local currentTime = love.timer.getTime()
 
     -- Si no ha pasado 1 segundo desde el último disparo, no hacer daño
-    if weapon.lastShotTime and (currentTime - weapon.lastShotTime < 0.19) then
+    if weapon.lastShotTime and (currentTime - weapon.lastShotTime < 0.285) then
         return false
     end
 
