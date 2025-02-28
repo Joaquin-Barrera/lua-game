@@ -68,6 +68,7 @@ function love.load()
     background = love.graphics.newImage("sprites/ciudad.png") -- Asegúrate de que el archivo esté en la ruta correcta
 
     -- Inicializar módulos
+    Game.load()
     Player.load()
     Enemy.load()
     Menu.load()
@@ -92,6 +93,7 @@ function love.draw()
     if currentState == "menu" then
         Menu.draw()
     elseif currentState == "play" then
+        Game.draw()
         Enemy.draw()
         Player.draw(gamePaused)
 
