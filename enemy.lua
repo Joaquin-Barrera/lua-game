@@ -83,7 +83,7 @@ function Enemy.spawn()
 
     table.insert(Enemy.enemies, {
         x = love.math.random(-80, -250),
-        y = screenHeight * (220 / baseHeight), -- Escalar en proporción a la altura
+        y = love.math.random(150, 220), -- Escalar en proporción a la altura
         speed = love.math.random(50, 200),
         stopX = love.math.random(1, 300),
         stopped = false,
@@ -105,7 +105,7 @@ end
 
 function Enemy.drawHealthBar(enemy)
     local x = (enemy.x +30 ) --que tan de lado se dibuja (x)
-    local y = enemy.y + 130 --que tanalto se dibuja
+    local y = enemy.y + 130 --que tan alto se dibuja
     local width = 50 --que tan gorda de ancho es la vida
     local height = 2 --que tan gorda (en altura) es la vida
 

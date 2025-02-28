@@ -44,7 +44,7 @@ function shop.draw()
         love.mouse.setVisible(true) -- Mostrar el mouse
         -- Dibujar un fondo semitransparente para la tienda
         love.graphics.setColor(0, 0, 0, 0.7)
-        love.graphics.rectangle("fill", 100, 50, 400, 300)
+        love.graphics.rectangle("fill", 100, 50, 600, 400)
         
         -- Dibujar el título de la tienda
         love.graphics.setColor(1, 1, 1)
