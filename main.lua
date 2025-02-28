@@ -95,18 +95,15 @@ function love.draw()
         Enemy.draw()
         Player.draw(gamePaused)
 
-        -- Dibujar el dinero del jugador
+     -- Dibujar el dinero del jugador
         love.graphics.setColor(1, 1, 0) -- Amarillo
-        local x = VIRTUAL_WIDTH - 100
-        local y = VIRTUAL_HEIGHT - 200
-        love.graphics.print("$$$ : ", x, y)
-        local textWidth = love.graphics.getFont():getWidth("$$$ : ")
-        love.graphics.print(
-            shop.getMoney(),
-            x + textWidth, y,
-            shop.moneyRotation,
-            shop.moneyScale, shop.moneyScale
-        )
+        local moneyFont = love.graphics.newFont(30) -- Crear una nueva fuente con tamaño 48
+        love.graphics.setFont(moneyFont) -- Establecer la nueva fuente como activa
+        local moneyText = "$$$ : " .. shop.getMoney()
+        local x = love.graphics.getWidth() - 150 -- Esquina inferior derecha
+        local y = love.graphics.getHeight() - 100 -- Esquina inferior derecha
+        love.graphics.print(moneyText, x, y, shop.moneyRotation, shop.moneyScale, shop.moneyScale
+    )
         love.graphics.setColor(1, 1, 1) -- Restaurar a blanco
 
         -- Dibujar la tienda si está activa

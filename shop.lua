@@ -3,11 +3,6 @@ local shop = {}
 shop.money = 0  -- Dinero inicial
 shop.moneyScale = 1  -- Escala del texto
 shop.scaleTimer = 0  -- Temporizador para reducir la escala
-shop.moneyRotation = 0  -- Ángulo de rotación del texto
-shop.rotationDirection = 10  -- Dirección de la rotación (1 para adelante, -1 para atrás)
-shop.rotationSpeed = 1  -- Velocidad de la rotación (en radianes por segundo)
-shop.rotationRange = 0.1  -- Rango máximo de rotación (en radianes)
-shop.danceTimer = 0  -- Temporizador para el baile (0 significa que no está bailando)
 
 shop.active = false -- Indica si la tienda está activa
 shop.items = {
@@ -20,7 +15,6 @@ function shop.addMoney(amount)
     shop.money = shop.money + amount
     shop.moneyScale = 1.2  -- Aumenta el tamaño del texto temporalmente
     shop.scaleTimer = 0.5   -- Duración del efecto de escala (en segundos)
-    shop.danceTimer = 1.5   -- Activar el baile por 1 segundo
 end
 
 function shop.getMoney()
@@ -33,6 +27,7 @@ function shop.update(dt)
         return
     end
 
+    -- Reducir gradualmente la escala del dinero
     if shop.moneyScale > 1 then
         shop.scaleTimer = shop.scaleTimer - dt
         if shop.scaleTimer <= 0 then
@@ -42,25 +37,11 @@ function shop.update(dt)
             end
         end
     end
-
-    if shop.danceTimer > 0 then
-        shop.danceTimer = shop.danceTimer - dt
-        shop.moneyRotation = shop.moneyRotation + shop.rotationDirection * shop.rotationSpeed * dt
-        if shop.moneyRotation > shop.rotationRange then
-            shop.moneyRotation = shop.rotationRange
-            shop.rotationDirection = -1
-        elseif shop.moneyRotation < -shop.rotationRange then
-            shop.moneyRotation = -shop.rotationRange
-            shop.rotationDirection = 1
-        end
-    else
-        shop.moneyRotation = 0
-    end
 end
 
 function shop.draw()
     if shop.active then
-        love.mouse.setVisible(true) --dibujar el mouse
+        love.mouse.setVisible(true) -- Mostrar el mouse
         -- Dibujar un fondo semitransparente para la tienda
         love.graphics.setColor(0, 0, 0, 0.7)
         love.graphics.rectangle("fill", 100, 50, 400, 300)
