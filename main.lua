@@ -16,24 +16,6 @@ local gamePaused = false
 local fullscreen = false
 local screenWidth, screenHeight = VIRTUAL_WIDTH, VIRTUAL_HEIGHT
 
-function love.load()
-    love.graphics.setDefaultFilter("nearest", "nearest")
-    love.window.setTitle("Trigger Rush // Trigger Frenzy")
-
-    push:setupScreen(VIRTUAL_WIDTH, VIRTUAL_HEIGHT, WINDOW_WIDTH, WINDOW_HEIGHT, {
-        fullscreen = fullscreen,
-        vsync = true,
-        resizable = true
-    })
-
-    love.mouse.setVisible(true)
-
-    -- Inicializar módulos
-    Player.load()
-    Enemy.load()
-    Menu.load()
-end
-
 function resetGame()
     Player.load()
     Enemy.clear()
@@ -68,21 +50,55 @@ function love.resize(w, h)
     push:resize(w, h)
 end
 
-function love.draw()
-    Game.background = love.graphics.newImage("sprites/ciudadprueba2.png")
+local background -- Definir la variable globalmente
 
-    -- Dibujar la interfaz y los objetos del juego
+function love.load()
+    love.graphics.setDefaultFilter("nearest", "nearest")
+    love.window.setTitle("Trigger Rush // Trigger Frenzy")
+
+    push:setupScreen(VIRTUAL_WIDTH, VIRTUAL_HEIGHT, WINDOW_WIDTH, WINDOW_HEIGHT, {
+        fullscreen = fullscreen,
+        vsync = true,
+        resizable = true
+    })
+
+    love.mouse.setVisible(true)
+
+    -- Cargar la nueva imagen de fondo
+    background = love.graphics.newImage("sprites/ciudad.png") -- Asegúrate de que el archivo esté en la ruta correcta
+
+    -- Inicializar módulos
+    Player.load()
+    Enemy.load()
+    Menu.load()
+end
+
+function love.draw()
+    push:apply("start")
+
+    -- Calcular la escala para llenar toda la pantalla sin distorsión
+    local scaleX = VIRTUAL_WIDTH / background:getWidth()
+    local scaleY = VIRTUAL_HEIGHT / background:getHeight()
+    local scale = math.max(scaleX, scaleY) -- Ajustar al mayor de los dos valores para evitar espacios vacíos
+
+    -- Centrar la imagen si es más grande que la pantalla virtual
+    local offsetX = (VIRTUAL_WIDTH - background:getWidth() * scale) / 2
+    local offsetY = (VIRTUAL_HEIGHT - background:getHeight() * scale) / 2
+
+    -- Dibujar la imagen escalada y centrada
+    love.graphics.draw(background, offsetX, offsetY, 0, scale, scale)
+
+    -- Dibujar los demás elementos del juego
     if currentState == "menu" then
         Menu.draw()
     elseif currentState == "play" then
-        Game.draw()
         Enemy.draw()
         Player.draw(gamePaused)
 
         -- Dibujar el dinero del jugador
         love.graphics.setColor(1, 1, 0) -- Amarillo
-        local x = love.graphics.getWidth() - 100
-        local y = love.graphics.getHeight() - 200
+        local x = VIRTUAL_WIDTH - 100
+        local y = VIRTUAL_HEIGHT - 200
         love.graphics.print("$$$ : ", x, y)
         local textWidth = love.graphics.getFont():getWidth("$$$ : ")
         love.graphics.print(
@@ -102,22 +118,24 @@ function love.draw()
         if gamePaused then
             love.mouse.setVisible(true)
             love.graphics.setColor(0, 0, 0, 0.5)
-            love.graphics.rectangle("fill", 0, 0, love.graphics.getWidth(), love.graphics.getHeight())
+            love.graphics.rectangle("fill", 0, 0, VIRTUAL_WIDTH, VIRTUAL_HEIGHT)
             love.graphics.setColor(1, 1, 1)
-            love.graphics.printf("PAUSA", 0, love.graphics.getHeight() / 2 - 20, love.graphics.getWidth(), "center")
-            love.graphics.printf("Presiona P para reanudar", 0, love.graphics.getHeight() / 2 + 20, love.graphics.getWidth(), "center")
+            love.graphics.printf("PAUSA", 0, VIRTUAL_HEIGHT / 2 - 20, VIRTUAL_WIDTH, "center")
+            love.graphics.printf("Presiona P para reanudar", 0, VIRTUAL_HEIGHT / 2 + 20, VIRTUAL_WIDTH, "center")
         else
             love.mouse.setVisible(false)
         end
     elseif currentState == "gameover" then
         -- Pantalla de Game Over
         love.graphics.setColor(0, 0, 0)
-        love.graphics.rectangle("fill", 0, 0, love.graphics.getWidth(), love.graphics.getHeight())
+        love.graphics.rectangle("fill", 0, 0, VIRTUAL_WIDTH, VIRTUAL_HEIGHT)
         love.graphics.setColor(1, 0, 0)
-        love.graphics.printf("GAME OVER", 0, love.graphics.getHeight() / 2 - 40, love.graphics.getWidth(), "center")
+        love.graphics.printf("GAME OVER", 0, VIRTUAL_HEIGHT / 2 - 40, VIRTUAL_WIDTH, "center")
         love.graphics.setColor(1, 1, 1)
-        love.graphics.printf("Presiona R para reiniciar", 0, love.graphics.getHeight() / 2 + 20, love.graphics.getWidth(), "center")
+        love.graphics.printf("Presiona R para reiniciar", 0, VIRTUAL_HEIGHT / 2 + 20, VIRTUAL_WIDTH, "center")
     end
+
+    push:apply("end")
 end
 
 function love.mousepressed(x, y, button)

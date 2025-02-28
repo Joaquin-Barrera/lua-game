@@ -1,4 +1,6 @@
 anim8 = require "libraries/anim8"
+local push = require "libraries/push"
+
 local Weapons = {}
 
 function Weapons.load()
@@ -49,24 +51,61 @@ function Weapons.update(dt, weapon)
     end
 end
 
---MEJORAR PARA PANTALLA COMPLETA, QUIZAS NECESITO USAR PUSH, VERIFICAR
+--BASTANTE MEJOR PERO NECESITA CAMBIOS, MEJORAR HACIENDO QUE NO SIGA LINEALMENTE EL MOUSE
 function Weapons.draw(weapon, x, y)
-    local screenWidth = love.graphics.getWidth()
-    local screenHeight = love.graphics.getHeight()
+    push:apply("start")
+    
+    -- Resolución virtual definida en Push
+    local virtualWidth = 640  
+    local virtualHeight = 360  
 
-    -- Limitar X dentro de un rango permitido
-    if x > 50 then
-        x = 50
-    end
+    -- Obtener dimensiones de la pantalla
+    local screenWidth, screenHeight = push:getDimensions()
+    
+    -- Escalar la posición para que se ajuste a la pantalla completa
+    local scaleX = screenWidth / virtualWidth
+    local scaleY = screenHeight / virtualHeight
+    local scaleFactor = math.min(scaleX, scaleY)  
 
-    -- Limitar Y dentro de un rango permitido
-    if y > 50 then
-        y = 50
-    end
+    -- Obtener la posición del mouse
+    local mouseX, mouseY = love.mouse.getPosition()
 
-    -- Dibujar el arma en la posición corregida
-    weapon.currentAnimation:draw(weapon.spritesheet, x, y)
+    -- Escalar la posición del mouse al espacio virtual
+    mouseX = (mouseX / screenWidth) 
+    mouseY = (mouseY / screenHeight)
+
+    -- Normalizar posición del mouse en el rango -1 a 1 (centro = 0, izquierda = -1, derecha = 1)
+    local normalizedMouseX = (mouseX / (virtualWidth))
+
+    -- Definir el rango de movimiento del arma
+    local xMin, xMax = -400, 50
+    local yMin, yMax = 0, 100  
+
+    -- Mapear la posición normalizada del mouse al rango de movimiento del arma
+    local targetX = xMin + (xMax - xMin) * ((normalizedMouseX + 1) / 2)
+    local targetY = mouseY
+
+    -- Aplicar interpolación suavizada
+    local lerpFactor = 0.3  
+    x = x + (targetX - x) * lerpFactor
+    y = y + (targetY - y) * lerpFactor
+
+    -- Aplicar límites
+    x = math.max(xMin, math.min(xMax, x))
+    y = math.max(yMin, math.min(yMax, y))
+
+    -- Ajustar el tamaño del arma usando scaleFactor
+    local weaponScale = scaleFactor * 0.5  
+
+    -- Dibujar el arma con la escala aplicada
+    weapon.currentAnimation:draw(weapon.spritesheet, x * scaleFactor, y * scaleFactor, 0, weaponScale, weaponScale)
+
+    push:apply("end")
 end
+
+
+
+
 
 function Weapons.shoot(weapon)
     if weapon.isReloading or weapon.isShooting then return end
